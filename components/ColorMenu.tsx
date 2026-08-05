@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from '@/components/Themed';
-import { NativeEventEmitter } from 'react-native';
+import { NativeEventEmitter, StyleSheet } from 'react-native';
 import { HexCodes } from '@/constants/HexCodes';
 import { Events } from '@/constants/Events';
 import ColorList from '@/components/ColorList';
@@ -48,11 +48,17 @@ const ColorMenu: PropComponent<ColorMenuProps> = (
     );
 
     return (
-        <View>
+        <View style={styles.container}>
             <ColorList colors={colors} disabled={true} />
             <ColorList colors={hexCodes} onPress={onPress} />
         </View>
     );
 };
 
+const styles = StyleSheet.create({
+    container: {
+        alignItems: 'center',
+        marginTop: 20
+    }
+});
 export default ColorMenu;

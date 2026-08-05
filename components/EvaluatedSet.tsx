@@ -31,7 +31,8 @@ const EvaluatedSet: PropComponent<EvaluatedSetProps> = (
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row'
+        flexDirection: 'row',
+        paddingVertical: 5
     },
     label: {
         padding: 4
