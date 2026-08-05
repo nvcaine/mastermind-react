@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { View } from '@/components/Themed';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import {
     EmitterSubscription,
     NativeEventEmitter,
+    ScrollView,
     StyleSheet
 } from 'react-native';
 import { Events } from '@/constants/Events';
@@ -23,12 +23,18 @@ type SubmitHandler = (
     setter: SetsSetter,
     solution: string[]
 ) => SetSetter;
+type SizeChangeHandler = (viewRef: RefObject<ScrollView | null>) => EffectSetup;
 type SubmitEffectSetup = (
     emitter: NativeEventEmitter,
     onSubmitSet: SetSetter
 ) => EffectSetup;
 type WinEffectSetup = (
+    emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
+    maxColors: number
+) => EffectSetup;
+type ResetEffectSetup = (
+    emitter: NativeEventEmitter,
     setSets: SetsSetter,
     setSolution: SetSetter,
     maxColors: number
@@ -58,6 +64,22 @@ const getRandomColors: Shuffler = (maxColors: number): string[] => {
     }
 
     return result;
+};
+
+const getWinEffectHandler: WinEffectSetup = (
+    emitter: NativeEventEmitter,
+    sets: EvaluatedSetObject[],
+    maxColors: number
+) => {
+    return (): EffectSetup => {
+        const lastSet: EvaluatedSetObject | undefined = sets.at(-1);
+
+        if (lastSet?.correct === maxColors) {
+            emitter.emit(Events.FOUND_SET);
+        }
+
+        return (): void => {};
+    };
 };
 
 const evaluate: Checker = (
@@ -111,23 +133,32 @@ const getSubmitEffectHandler: SubmitEffectSetup = (
     };
 };
 
-const getWinEffectHandler: WinEffectSetup = (
-    sets: EvaluatedSetObject[],
+const getResetEffectHandler: ResetEffectSetup = (
+    emitter: NativeEventEmitter,
     setSets: SetsSetter,
     setSolution: SetSetter,
     maxColors: number
 ) => {
-    return (): EffectSetup => {
-        const lastSet: EvaluatedSetObject | undefined = sets.at(-1);
+    return () => {
+        const subscription: EmitterSubscription = emitter.addListener(
+            Events.RESET_SETS,
+            (): void => {
+                const randomColors: string[] = getRandomColors(maxColors);
 
-        if (lastSet?.correct === maxColors) {
-            const randomColors: string[] = getRandomColors(maxColors);
+                setSolution(randomColors);
+                setSets([]);
+            }
+        );
 
-            setSolution(randomColors);
-            setSets([]);
-        }
+        return () => subscription.remove();
+    };
+};
 
-        return (): void => {};
+const getSizeChangeHandler: SizeChangeHandler = (
+    viewRef: RefObject<ScrollView | null>
+) => {
+    return (): void => {
+        viewRef.current?.scrollToEnd({ animated: true });
     };
 };
 
@@ -144,18 +175,33 @@ const SetList: PropComponent<SetListProps> = (
         onSubmitSet
     );
     const winHandler: EffectSetup = getWinEffectHandler(
+        emitter,
         sets,
+        maxColors
+    );
+    const resetHandler: EffectSetup = getResetEffectHandler(
+        emitter,
         setSets,
         setSolution,
         maxColors
     );
-
-    console.log(solution);
+    const viewRef: RefObject<ScrollView | null> = useRef<ScrollView>(null);
 
     useEffect(submitHandler, [sets]);
     useEffect(winHandler, [sets]);
+    useEffect(resetHandler, []);
 
-    return <View style={styles.container}>{sets.map(getSetElement)}</View>;
+    console.log(solution);
+
+    return (
+        <ScrollView
+            contentContainerStyle={styles.container}
+            ref={viewRef}
+            onContentSizeChange={getSizeChangeHandler(viewRef)}
+        >
+            {sets.map(getSetElement)}
+        </ScrollView>
+    );
 };
 
 const styles = StyleSheet.create({
