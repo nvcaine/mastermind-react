@@ -7,6 +7,7 @@ import { StyleSheet } from 'react-native';
 
 interface EvaluatedSetProps extends Props {
     set: EvaluatedSetObject;
+    hideLabels?: boolean;
 }
 
 export interface EvaluatedSetObject {
@@ -18,13 +19,16 @@ export interface EvaluatedSetObject {
 const EvaluatedSet: PropComponent<EvaluatedSetProps> = (
     props: EvaluatedSetProps
 ): React.JSX.Element => {
-    const { set } = props;
+    const { set, hideLabels } = props;
+    const labelStyle = hideLabels
+        ? [styles.hidden, styles.label]
+        : styles.label;
 
     return (
         <View style={styles.container}>
-            <MonoText style={styles.label}>{set.correct}</MonoText>
+            <MonoText style={labelStyle}>{set.correct}</MonoText>
             <ColorList colors={set.colors} disabled={true} />
-            <MonoText style={styles.label}>{set.offset}</MonoText>
+            <MonoText style={labelStyle}>{set.offset}</MonoText>
         </View>
     );
 };
@@ -35,7 +39,10 @@ const styles = StyleSheet.create({
         paddingVertical: 5
     },
     label: {
-        padding: 4
+        padding: 5
+    },
+    hidden: {
+        visibility: 'hidden'
     }
 });
 

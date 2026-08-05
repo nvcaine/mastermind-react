@@ -9,6 +9,8 @@ import { Events } from '@/constants/Events';
 import { PropComponent, Props } from '@/components/PropComponent';
 import { HexCodes } from '@/constants/HexCodes';
 import EvaluatedSet, { EvaluatedSetObject } from '@/components/EvaluatedSet';
+import { View } from '@/components/Themed';
+import PlaceholderSet from '@/components/PlaceholderSet';
 
 interface SetListProps extends Props {
     emitter: NativeEventEmitter;
@@ -158,7 +160,37 @@ const getSizeChangeHandler: SizeChangeHandler = (
     viewRef: RefObject<ScrollView | null>
 ) => {
     return (): void => {
+        console.log('Size changed');
         viewRef.current?.scrollToEnd({ animated: true });
+    };
+};
+
+const getAddColorHandler = (
+    emitter: NativeEventEmitter,
+    colors: string[],
+    setColors: (colors: string[]) => void,
+    maxColors: number
+): EffectSetup => {
+    return () => {
+        const subscription: EmitterSubscription = emitter.addListener(
+            Events.ADD_COLOR,
+            (hexCode: string): void => {
+                const currentColors: string[] = colors.concat(hexCode);
+
+                setColors(currentColors);
+
+                if (
+                    currentColors.length === maxColors &&
+                    currentColors.at(-1) !== 'transparent'
+                ) {
+                    // refactor this part to update the sets directly without using an event
+                    emitter.emit(Events.SUBMIT_SET, currentColors);
+                    setColors([]);
+                }
+            }
+        );
+
+        return () => subscription.remove();
     };
 };
 
@@ -169,6 +201,7 @@ const SetList: PropComponent<SetListProps> = (
     const randomColors: string[] = getRandomColors(maxColors);
     const [sets, setSets] = useState<EvaluatedSetObject[]>([]);
     const [solution, setSolution] = useState<string[]>(randomColors);
+    const [colors, setColors] = useState<string[]>([]);
     const onSubmitSet: SetSetter = getSubmitHandler(sets, setSets, solution);
     const submitHandler: EffectSetup = getSubmitEffectHandler(
         emitter,
@@ -185,28 +218,45 @@ const SetList: PropComponent<SetListProps> = (
         setSolution,
         maxColors
     );
+    const addColorHandler: EffectSetup = getAddColorHandler(
+        emitter,
+        colors,
+        setColors,
+        maxColors
+    );
     const viewRef: RefObject<ScrollView | null> = useRef<ScrollView>(null);
+    const currentSet: EvaluatedSetObject = { colors, correct: 0, offset: 0 };
 
     useEffect(submitHandler, [sets]);
     useEffect(winHandler, [sets]);
     useEffect(resetHandler, []);
+    useEffect(addColorHandler, [colors]);
 
     console.log(solution);
 
     return (
-        <ScrollView
-            contentContainerStyle={styles.container}
-            ref={viewRef}
-            onContentSizeChange={getSizeChangeHandler(viewRef)}
-        >
-            {sets.map(getSetElement)}
-        </ScrollView>
+        <View style={styles.container}>
+            <ScrollView
+                contentContainerStyle={styles.scroll}
+                ref={viewRef}
+                onContentSizeChange={getSizeChangeHandler(viewRef)}
+            >
+                {sets.map(getSetElement)}
+
+                <PlaceholderSet />
+
+                <EvaluatedSet set={currentSet} hideLabels={true} />
+            </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        alignItems: 'center',
+        flex: 1
+    },
+    scroll: {
         alignItems: 'flex-start'
     }
 });

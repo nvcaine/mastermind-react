@@ -10,6 +10,7 @@ import SetList from '@/components/SetList';
 import { PropComponent } from '@/components/PropComponent';
 import { Events } from '@/constants/Events';
 import WinModal from '@/components/WinModal';
+import { HexCodes } from '@/constants/HexCodes';
 
 type ShowModalSetter = (showModal: boolean) => void;
 type EffectSetup = () => void; // duplicate in SetList
@@ -71,6 +72,7 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
         showModal,
         setShowModal
     );
+    const maxAvailableColors: number = Object.values(HexCodes).length;
 
     useEffect(foundEffect, [showModal]);
 
@@ -80,7 +82,10 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
         <View style={styles.container}>
             <WinModal visible={showModal} onPress={onPressHandler} />
             <SetList emitter={eventEmitter} maxColors={maxColors} />
-            <ColorMenu emitter={eventEmitter} maxColors={maxColors} />
+            <ColorMenu
+                emitter={eventEmitter}
+                availableColors={maxAvailableColors}
+            />
         </View>
     );
 };
