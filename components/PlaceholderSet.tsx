@@ -4,7 +4,7 @@ import React from 'react';
 import { PropComponent } from '@/components/PropComponent';
 import { StyleSheet } from 'react-native';
 
-const PlaceholderSet: PropComponent<undefined> = () => {
+const PlaceholderSet: PropComponent<{}> = () => {
     const defaultSet: EvaluatedSetObject = {
         colors: ['transparent', 'transparent', 'transparent', 'transparent'],
         correct: 0,
