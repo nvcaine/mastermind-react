@@ -1,12 +1,13 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { EventCallback } from '@/constants/Events';
 import { MonoText } from '@/components/StyledText';
 import { PropComponent, Props } from '@/components/PropComponent';
 
 interface WinModalProps extends Props {
     visible: boolean;
-    onClose: () => void;
-    onNextLevel: () => void;
+    onClose: EventCallback;
+    onNextLevel: EventCallback;
     showNext: boolean;
 }
 

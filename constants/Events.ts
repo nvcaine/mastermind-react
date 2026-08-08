@@ -5,4 +5,5 @@ export enum Events {
     RESET_SETS = 'RESET_SETS'
 }
 
-export type EffectSetup = () => void;
+export type EventCallback = () => void;
+export type EventParamCallback<T> = (data: T) => void;

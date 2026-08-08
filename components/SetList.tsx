@@ -8,15 +8,13 @@ import React, { RefObject, useEffect, useRef, useState } from 'react';
 import EvaluatedSet, {
     evaluate,
     EvaluatedSetObject,
-    getSetElement,
-    EvaluatedSetsCallback
+    getSetElement
 } from '@/components/EvaluatedSet';
 import { View } from '@/components/Themed';
-import { EffectSetup, Events } from '@/constants/Events';
+import { GameLevel } from '@/constants/GameLevels';
 import PlaceholderSet from '@/components/PlaceholderSet';
-import { ColorCallback, SetCallback } from '@/constants/HexCodes';
-import { GameLevel, LevelCallback } from '@/constants/GameLevels';
 import { PropComponent, Props } from '@/components/PropComponent';
+import { EventParamCallback, EventCallback, Events } from '@/constants/Events';
 
 interface SetListProps extends Props {
     currentLevel: GameLevel;
@@ -24,40 +22,44 @@ interface SetListProps extends Props {
     solution: string[];
 }
 
-type ResetHandler = (setSets: EvaluatedSetsCallback) => LevelCallback;
+type ResetHandler = (
+    setSets: EventParamCallback<EvaluatedSetObject[]>
+) => EventParamCallback<number>;
 type AddColorHandler = (
     colors: string[],
-    setColors: SetCallback,
+    setColors: EventParamCallback<string[]>,
     maxColors: number,
-    submitSet: SetCallback
-) => ColorCallback;
+    submitSet: EventParamCallback<string[]>
+) => EventParamCallback<string>;
 type SubmitSetHandler = (
     sets: EvaluatedSetObject[],
-    setSets: EvaluatedSetsCallback,
+    setSets: EventParamCallback<EvaluatedSetObject[]>,
     solution: string[]
-) => SetCallback;
-type SizeChangeHandler = (viewRef: RefObject<ScrollView | null>) => EffectSetup;
+) => EventParamCallback<string[]>;
+type SizeChangeHandler = (
+    viewRef: RefObject<ScrollView | null>
+) => EventCallback;
 
 type AddColorEffectSetup = (
     emitter: NativeEventEmitter,
-    onAddColor: ColorCallback
-) => EffectSetup;
+    onAddColor: EventParamCallback<string>
+) => EventCallback;
 type FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
-) => EffectSetup;
+) => EventCallback;
 type ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    onReset: LevelCallback
-) => EffectSetup;
+    onReset: EventParamCallback<number>
+) => EventCallback;
 
 const getFoundEffectHandler: FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
-): EffectSetup => {
-    return (): EffectSetup => {
+): EventCallback => {
+    return (): EventCallback => {
         const lastSet: EvaluatedSetObject | undefined = sets.at(-1);
 
         if (lastSet?.correct === maxColors) {
@@ -69,8 +71,8 @@ const getFoundEffectHandler: FoundEffectSetup = (
 };
 
 const getResetHandler: ResetHandler = (
-    setSets: EvaluatedSetsCallback
-): LevelCallback => {
+    setSets: EventParamCallback<EvaluatedSetObject[]>
+): EventParamCallback<number> => {
     return (): void => {
         setSets([]);
     };
@@ -78,8 +80,8 @@ const getResetHandler: ResetHandler = (
 
 const getResetEffectHandler: ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    onReset: LevelCallback
-): EffectSetup => {
+    onReset: EventParamCallback<number>
+): EventCallback => {
     return () => {
         const subscription: EmitterSubscription = emitter.addListener(
             Events.RESET_SETS,
@@ -92,7 +94,7 @@ const getResetEffectHandler: ResetEffectSetup = (
 
 const getSizeChangeHandler: SizeChangeHandler = (
     viewRef: RefObject<ScrollView | null>
-): EffectSetup => {
+): EventCallback => {
     return (): void => {
         viewRef.current?.scrollToEnd({ animated: true });
     };
@@ -100,9 +102,9 @@ const getSizeChangeHandler: SizeChangeHandler = (
 
 const getSubmitHandler: SubmitSetHandler = (
     sets: EvaluatedSetObject[],
-    setSets: EvaluatedSetsCallback,
+    setSets: EventParamCallback<EvaluatedSetObject[]>,
     solution: string[]
-): SetCallback => {
+): EventParamCallback<string[]> => {
     return (current: string[]): void => {
         const result: EvaluatedSetObject = evaluate(current, solution);
 
@@ -112,10 +114,10 @@ const getSubmitHandler: SubmitSetHandler = (
 
 const getAddColorHandler: AddColorHandler = (
     colors: string[],
-    setColors: SetCallback,
+    setColors: EventParamCallback<string[]>,
     maxColors: number,
-    submitHandler: SetCallback
-): ColorCallback => {
+    submitHandler: EventParamCallback<string[]>
+): EventParamCallback<string> => {
     return (hexCode: string): void => {
         const current: string[] = colors.concat(hexCode);
 
@@ -130,8 +132,8 @@ const getAddColorHandler: AddColorHandler = (
 
 const getAddColorEffectHandler: AddColorEffectSetup = (
     emitter: NativeEventEmitter,
-    onAddColor: ColorCallback
-): EffectSetup => {
+    onAddColor: EventParamCallback<string>
+): EventCallback => {
     return () => {
         const subscription: EmitterSubscription = emitter.addListener(
             Events.ADD_COLOR,
@@ -148,28 +150,28 @@ const SetList: PropComponent<SetListProps> = (
     const { emitter, currentLevel, solution } = props;
     const [sets, setSets] = useState<EvaluatedSetObject[]>([]);
     const [colors, setColors] = useState<string[]>([]);
-    const submitSetHandler: SetCallback = getSubmitHandler(
+    const submitSetHandler: EventParamCallback<string[]> = getSubmitHandler(
         sets,
         setSets,
         solution
     );
-    const addColorHandler: ColorCallback = getAddColorHandler(
+    const addColorHandler: EventParamCallback<string> = getAddColorHandler(
         colors,
         setColors,
         currentLevel.colorsLength,
         submitSetHandler
     );
-    const resetHandler: LevelCallback = getResetHandler(setSets);
-    const foundEffect: EffectSetup = getFoundEffectHandler(
+    const resetHandler: EventParamCallback<number> = getResetHandler(setSets);
+    const foundEffect: EventCallback = getFoundEffectHandler(
         emitter,
         sets,
         currentLevel.colorsLength
     );
-    const resetEffect: EffectSetup = getResetEffectHandler(
+    const resetEffect: EventCallback = getResetEffectHandler(
         emitter,
         resetHandler
     );
-    const addColorEffect: EffectSetup = getAddColorEffectHandler(
+    const addColorEffect: EventCallback = getAddColorEffectHandler(
         emitter,
         addColorHandler
     );

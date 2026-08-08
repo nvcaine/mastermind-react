@@ -18,7 +18,36 @@ export interface EvaluatedSetObject {
 
 type Mapper = (set: EvaluatedSetObject, index: number) => React.JSX.Element;
 type Checker = (colors: string[], solution: string[]) => EvaluatedSetObject;
-export type EvaluatedSetsCallback = (sets: EvaluatedSetObject[]) => void;
+
+export const getSetElement: Mapper = (
+    set: EvaluatedSetObject,
+    index: number
+) => <EvaluatedSet set={set} key={index} />;
+
+export const evaluate: Checker = (
+    colors: string[],
+    solution: string[]
+): EvaluatedSetObject => {
+    let correct: number = 0;
+    let offset: number = 0;
+
+    for (let i: number = 0; i < colors.length; i++) {
+        if (colors[i] === solution[i]) {
+            correct++;
+            continue;
+        }
+
+        for (let j: number = 0; j < solution.length; j++) {
+            if (colors[i] === solution[j] && i !== j) {
+                offset++;
+            }
+        }
+    }
+
+    console.log('Evaluated:', colors, correct, offset);
+
+    return { colors, correct, offset };
+};
 
 const EvaluatedSet: PropComponent<EvaluatedSetProps> = (
     props: EvaluatedSetProps
@@ -50,35 +79,5 @@ const styles = StyleSheet.create({
         color: 'black'
     }
 });
-
-export const getSetElement: Mapper = (
-    set: EvaluatedSetObject,
-    index: number
-) => <EvaluatedSet set={set} key={index} />;
-
-export const evaluate: Checker = (
-    colors: string[],
-    solution: string[]
-): EvaluatedSetObject => {
-    let correct: number = 0;
-    let offset: number = 0;
-
-    for (let i: number = 0; i < colors.length; i++) {
-        if (colors[i] === solution[i]) {
-            correct++;
-            continue;
-        }
-
-        for (let j: number = 0; j < solution.length; j++) {
-            if (colors[i] === solution[j] && i !== j) {
-                offset++;
-            }
-        }
-    }
-
-    console.log('Evaluated:', colors, correct, offset);
-
-    return { colors, correct, offset };
-};
 
 export default EvaluatedSet;
