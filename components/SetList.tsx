@@ -15,22 +15,24 @@ import EvaluatedSet, {
 } from '@/components/EvaluatedSet';
 import { View } from '@/components/Themed';
 import PlaceholderSet from '@/components/PlaceholderSet';
+import {GameLevel, GameLevels} from '@/constants/GameLevels';
 
 interface SetListProps extends Props {
+    availableColors: number;
     emitter: NativeEventEmitter;
-    maxColors: number;
+    colorsLength: number;
 }
 
 type EffectSetup = () => void;
 type ColorCallback = (hexCode: string) => void;
+type LevelCallback = (level: number) => void;
 type SetCallback = (set: string[]) => void;
 type SetsCallback = (sets: EvaluatedSetObject[]) => void;
 
 type ResetHandler = (
     setSets: SetsCallback,
-    setSolution: SetCallback,
-    maxColors: number
-) => ColorCallback;
+    setSolution: SetCallback
+) => LevelCallback;
 type AddColorHandler = (
     colors: string[],
     setColors: SetCallback,
@@ -55,7 +57,7 @@ type FoundEffectSetup = (
 ) => EffectSetup;
 type ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    onReset: ColorCallback
+    onReset: LevelCallback
 ) => EffectSetup;
 
 const getFoundEffectHandler: FoundEffectSetup = (
@@ -76,11 +78,17 @@ const getFoundEffectHandler: FoundEffectSetup = (
 
 const getResetHandler: ResetHandler = (
     setSets: SetsCallback,
-    setSolution: SetCallback,
-    maxColors: number
-): ColorCallback => {
-    return (): void => {
-        const randomColors: string[] = getRandomColors(maxColors);
+    setSolution: SetCallback
+): LevelCallback => {
+    return (level: number): void => {
+        const currentLevel: GameLevel = GameLevels[level];
+
+        console.log('Call reset handler', currentLevel);
+        const randomColors: string[] = getRandomColors(
+            currentLevel.colorsLength,
+            currentLevel.availableColors
+        );
+        console.log('On reset colors', randomColors);
 
         setSolution(randomColors);
         setSets([]);
@@ -89,7 +97,7 @@ const getResetHandler: ResetHandler = (
 
 const getResetEffectHandler: ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    onReset: ColorCallback
+    onReset: LevelCallback
 ): EffectSetup => {
     return () => {
         const subscription: EmitterSubscription = emitter.addListener(
@@ -157,8 +165,12 @@ const getAddColorEffectHandler: AddColorEffectSetup = (
 const SetList: PropComponent<SetListProps> = (
     props: SetListProps
 ): React.JSX.Element => {
-    const { emitter, maxColors } = props;
-    const randomColors: string[] = getRandomColors(maxColors);
+    const { emitter, colorsLength, availableColors } = props;
+    const randomColors: string[] = getRandomColors(
+        colorsLength,
+        availableColors
+    );
+    console.log('Initial random colors', randomColors);
     const [sets, setSets] = useState<EvaluatedSetObject[]>([]);
     const [solution, setSolution] = useState<string[]>(randomColors);
     const [colors, setColors] = useState<string[]>([]);
@@ -170,18 +182,14 @@ const SetList: PropComponent<SetListProps> = (
     const addColorHandler: ColorCallback = getAddColorHandler(
         colors,
         setColors,
-        maxColors,
+        colorsLength,
         submitSetHandler
     );
-    const resetHandler: ColorCallback = getResetHandler(
-        setSets,
-        setSolution,
-        maxColors
-    );
+    const resetHandler: LevelCallback = getResetHandler(setSets, setSolution);
     const foundEffect: EffectSetup = getFoundEffectHandler(
         emitter,
         sets,
-        maxColors
+        colorsLength
     );
     const resetEffect: EffectSetup = getResetEffectHandler(
         emitter,
@@ -195,10 +203,10 @@ const SetList: PropComponent<SetListProps> = (
     const currentSet: EvaluatedSetObject = { colors, correct: 0, offset: 0 };
 
     useEffect(foundEffect, [sets]);
-    useEffect(resetEffect, []);
+    useEffect(resetEffect, [solution]);
     useEffect(addColorEffect, [colors]);
 
-    console.log(solution);
+    console.log('Solution:', solution);
 
     return (
         <View style={styles.container}>
@@ -209,7 +217,7 @@ const SetList: PropComponent<SetListProps> = (
             >
                 {sets.map(getSetElement)}
 
-                <PlaceholderSet />
+                <PlaceholderSet colorLength={colorsLength} />
 
                 <EvaluatedSet set={currentSet} hideLabels={true} />
             </ScrollView>

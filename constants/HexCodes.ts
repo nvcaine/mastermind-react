@@ -7,11 +7,16 @@ export enum HexCodes {
     TEAL = '#33CC99'
 }
 
-type Shuffler = (maxColors: number) => string[];
+type Shuffler = (maxColors: number, availableColors: number) => string[];
 
-export const getRandomColors: Shuffler = (maxColors: number): string[] => {
+export const getRandomColors: Shuffler = (
+    maxColors: number,
+    availableColors: number
+): string[] => {
+    console.log('Get colors', maxColors, availableColors)
+
     const result: string[] = [];
-    const colors: string[] = Object.values(HexCodes);
+    const colors: string[] = Object.values(HexCodes).slice(0, availableColors);
 
     for (let i: number = 0; i < maxColors; i++) {
         let index: number = Math.floor(Math.random() * colors.length);

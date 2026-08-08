@@ -1,6 +1,6 @@
 import React from 'react';
-import { View } from '@/components/Themed';
 import { NativeEventEmitter, StyleSheet } from 'react-native';
+import { View } from '@/components/Themed';
 import { HexCodes } from '@/constants/HexCodes';
 import { Events } from '@/constants/Events';
 import ColorList from '@/components/ColorList';

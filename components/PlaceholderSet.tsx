@@ -1,12 +1,19 @@
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import { View } from '@/components/Themed';
 import EvaluatedSet, { EvaluatedSetObject } from '@/components/EvaluatedSet';
-import React from 'react';
-import { PropComponent } from '@/components/PropComponent';
-import { StyleSheet } from 'react-native';
+import { PropComponent, Props } from '@/components/PropComponent';
 
-const PlaceholderSet: PropComponent<{}> = () => {
+export interface PlaceholderSetProps extends Props {
+    colorLength: number;
+}
+
+const PlaceholderSet: PropComponent<PlaceholderSetProps> = (
+    props: PlaceholderSetProps
+) => {
+    const { colorLength } = props;
     const defaultSet: EvaluatedSetObject = {
-        colors: ['transparent', 'transparent', 'transparent', 'transparent'],
+        colors: Array(colorLength).fill('transparent'),
         correct: 0,
         offset: 0
     };

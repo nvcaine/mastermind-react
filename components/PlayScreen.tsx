@@ -10,37 +10,56 @@ import SetList from '@/components/SetList';
 import { PropComponent } from '@/components/PropComponent';
 import { Events } from '@/constants/Events';
 import WinModal from '@/components/WinModal';
-import { HexCodes } from '@/constants/HexCodes';
+import { GameLevel, GameLevels } from '@/constants/GameLevels';
 
-type ShowModalCallback = (showModal: boolean) => void;
 type EffectSetup = () => void; // duplicate in SetList
+type ShowModalCallback = (showModal: boolean) => void;
+type SetLevelCallback = (level: number) => void;
 
-type Toggler = (
+type CloseHandler = (
+    emitter: NativeEventEmitter,
     showModal: boolean,
-    setShowModal: (showModal: boolean) => void
-) => void;
+    setShowModal: ShowModalCallback,
+    level: number
+) => EffectSetup;
+type NextLevelHandler = (
+    level: number,
+    setLevel: SetLevelCallback,
+    closeHandler: EffectSetup
+) => EffectSetup;
 
 type FoundEffectSetup = (
     emitter: NativeEventEmitter,
     showModal: boolean,
-    setShowModal: (showModal: boolean) => void
+    setShowModal: ShowModalCallback
 ) => EffectSetup;
 
-const toggleModal: Toggler = (
-    showModal: boolean,
-    setShowModal: (showModal: boolean) => void
-): void => {
-    setShowModal(!showModal);
-};
-
-const getOnCloseHandler: FoundEffectSetup = (
+const getOnCloseHandler: CloseHandler = (
     emitter: NativeEventEmitter,
     showModal: boolean,
-    setShowModal: (showModal: boolean) => void
+    setShowModal: ShowModalCallback,
+    level: number
+): EffectSetup => {
+    console.log('Get close handler', level)
+    return (): void => {
+        console.log('Close clicked');
+        setShowModal(!showModal)
+        emitter.emit(Events.RESET_SETS, level);
+    };
+};
+
+const getOnNextLevelHandler: NextLevelHandler = (
+    level: number,
+    setLevel: SetLevelCallback,
+    closeHandler: EffectSetup
 ): EffectSetup => {
     return (): void => {
-        toggleModal(showModal, setShowModal);
-        emitter.emit(Events.RESET_SETS);
+        console.log('Next clicked');
+        if (level < GameLevels.length - 1) {
+            console.log('Inc level');
+            setLevel(level + 1);
+            closeHandler();
+        }
     };
 };
 
@@ -52,7 +71,7 @@ const getFoundEffectSetup: FoundEffectSetup = (
     return (): EffectSetup => {
         const subscription: EventSubscription = emitter.addListener(
             Events.FOUND_SET,
-            (): void => toggleModal(showModal, setShowModal)
+            (): void => setShowModal(!showModal)
         );
 
         return () => subscription.remove();
@@ -60,33 +79,49 @@ const getFoundEffectSetup: FoundEffectSetup = (
 };
 
 const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
-    const eventEmitter: NativeEventEmitter = new NativeEventEmitter();
-    // get current level from storage (set length, available colors)
-    const maxColors: number = 4; // get from current level
     const [showModal, setShowModal] = useState<boolean>(false);
+    const [level, setLevel] = useState<number>(0);
+
+    const eventEmitter: NativeEventEmitter = new NativeEventEmitter();
+    const currentLevel: GameLevel = GameLevels[level];
+
+    const onCloseHandler: EffectSetup = getOnCloseHandler(
+        eventEmitter,
+        showModal,
+        setShowModal,
+        level
+    );
+    const onNextLevelHandler: EffectSetup = getOnNextLevelHandler(
+        level,
+        setLevel,
+        onCloseHandler
+    );
+
     const foundEffect: EffectSetup = getFoundEffectSetup(
         eventEmitter,
         showModal,
         setShowModal
     );
-    const onCloseHandler: EffectSetup = getOnCloseHandler(
-        eventEmitter,
-        showModal,
-        setShowModal
-    );
-    const maxAvailableColors: number = Object.values(HexCodes).length;
 
     useEffect(foundEffect, [showModal]);
 
-    console.log('Init main screen');
+    console.log('Init main screen', currentLevel);
 
     return (
         <View style={styles.container}>
-            <WinModal visible={showModal} onPress={onCloseHandler} />
-            <SetList emitter={eventEmitter} maxColors={maxColors} />
+            <WinModal
+                visible={showModal}
+                onClose={onCloseHandler}
+                onNextLevel={onNextLevelHandler}
+            />
+            <SetList
+                emitter={eventEmitter}
+                colorsLength={currentLevel.colorsLength}
+                availableColors={currentLevel.availableColors}
+            />
             <ColorMenu
                 emitter={eventEmitter}
-                availableColors={maxAvailableColors}
+                availableColors={currentLevel.availableColors}
             />
         </View>
     );

@@ -5,13 +5,14 @@ import { MonoText } from '@/components/StyledText';
 
 interface WinModalProps extends Props {
     visible: boolean;
-    onPress: () => void;
+    onClose: () => void;
+    onNextLevel: () => void;
 }
 
 const WinModal: PropComponent<WinModalProps> = (
     props: WinModalProps
 ): React.JSX.Element => {
-    const { visible, onPress } = props;
+    const { visible, onClose, onNextLevel } = props;
 
     return (
         <Modal animationType={'fade'} transparent={true} visible={visible}>
@@ -21,8 +22,11 @@ const WinModal: PropComponent<WinModalProps> = (
                         You found the solution!
                     </MonoText>
                     <View>
-                        <Pressable onPress={onPress} style={styles.button}>
-                            <MonoText>Close</MonoText>
+                        <Pressable onPress={onNextLevel} style={styles.button}>
+                            <MonoText>Next</MonoText>
+                        </Pressable>
+                        <Pressable onPress={onClose} style={styles.button}>
+                            <MonoText>Replay</MonoText>
                         </Pressable>
                     </View>
                 </View>
@@ -48,7 +52,8 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#29c',
-        padding: 10
+        padding: 10,
+        marginHorizontal: 10
     }
 });
 
