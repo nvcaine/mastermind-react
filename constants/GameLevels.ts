@@ -3,6 +3,8 @@ export interface GameLevel {
     colorsLength: number;
 }
 
+export type LevelCallback = (level: number) => void;
+
 export const GameLevels: GameLevel[] = [
     {
         availableColors: 4,

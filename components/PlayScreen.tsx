@@ -6,29 +6,26 @@ import {
 } from 'react-native';
 import { View } from '@/components/Themed';
 import SetList from '@/components/SetList';
-import { Events } from '@/constants/Events';
 import WinModal from '@/components/WinModal';
 import ColorMenu from '@/components/ColorMenu';
-import { MonoText } from '@/components/StyledText';
-import { getRandomColors } from '@/constants/HexCodes';
+import LevelHeading from '@/components/LevelHeading';
+import { EffectSetup, Events } from '@/constants/Events';
 import { PropComponent } from '@/components/PropComponent';
-import { GameLevel, GameLevels } from '@/constants/GameLevels';
+import { getRandomColors, SetCallback } from '@/constants/HexCodes';
+import { GameLevel, GameLevels, LevelCallback } from '@/constants/GameLevels';
 
-type EffectSetup = () => void; // duplicate in SetList
 type ShowModalCallback = (showModal: boolean) => void;
-type SetLevelCallback = (levelIndex: number) => void;
-type SetSolutionCallback = (solution: string[]) => void;
 
 type CloseHandler = (
     emitter: NativeEventEmitter,
     showModal: boolean,
     setShowModal: ShowModalCallback,
-    setSolution: SetSolutionCallback
-) => SetLevelCallback;
+    setSolution: SetCallback
+) => LevelCallback;
 type NextLevelHandler = (
     levelIndex: number,
-    setLevel: SetLevelCallback,
-    closeHandler: SetLevelCallback
+    setLevel: LevelCallback,
+    closeHandler: LevelCallback
 ) => EffectSetup;
 
 type FoundEffectSetup = (
@@ -41,8 +38,8 @@ const getOnCloseHandler: CloseHandler = (
     emitter: NativeEventEmitter,
     showModal: boolean,
     setShowModal: ShowModalCallback,
-    setSolution: SetSolutionCallback
-): SetLevelCallback => {
+    setSolution: SetCallback
+): LevelCallback => {
     return (levelIndex: number): void => {
         const currentLevel: GameLevel = GameLevels[levelIndex];
         const randomColors: string[] = getRandomColors(
@@ -58,8 +55,8 @@ const getOnCloseHandler: CloseHandler = (
 
 const getOnNextLevelHandler: NextLevelHandler = (
     levelIndex: number,
-    setLevel: SetLevelCallback,
-    closeHandler: SetLevelCallback
+    setLevel: LevelCallback,
+    closeHandler: LevelCallback
 ): EffectSetup => {
     return (): void => {
         if (levelIndex < GameLevels.length - 1) {
@@ -98,7 +95,7 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
     );
     const [solution, setSolution] = useState<string[]>(randomColors);
 
-    const onCloseHandler: SetLevelCallback = getOnCloseHandler(
+    const onCloseHandler: LevelCallback = getOnCloseHandler(
         eventEmitter,
         showModal,
         setShowModal,
@@ -126,11 +123,10 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
                 onNextLevel={onNextLevelHandler}
                 showNext={level < GameLevels.length - 1}
             />
-            <View style={styles.heading}>
-                <MonoText>
-                    Level: {level + 1} ({currentLevel.colorsLength} colors)
-                </MonoText>
-            </View>
+            <LevelHeading
+                level={level + 1}
+                colorsLength={currentLevel.colorsLength}
+            />
             <SetList
                 emitter={eventEmitter}
                 currentLevel={currentLevel}
@@ -149,9 +145,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
         flexDirection: 'column'
-    },
-    heading: {
-        alignItems: 'center'
     }
 });
 

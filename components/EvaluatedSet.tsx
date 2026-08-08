@@ -18,6 +18,7 @@ export interface EvaluatedSetObject {
 
 type Mapper = (set: EvaluatedSetObject, index: number) => React.JSX.Element;
 type Checker = (colors: string[], solution: string[]) => EvaluatedSetObject;
+export type EvaluatedSetsCallback = (sets: EvaluatedSetObject[]) => void;
 
 const EvaluatedSet: PropComponent<EvaluatedSetProps> = (
     props: EvaluatedSetProps

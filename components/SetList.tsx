@@ -8,12 +8,14 @@ import React, { RefObject, useEffect, useRef, useState } from 'react';
 import EvaluatedSet, {
     evaluate,
     EvaluatedSetObject,
-    getSetElement
+    getSetElement,
+    EvaluatedSetsCallback
 } from '@/components/EvaluatedSet';
 import { View } from '@/components/Themed';
-import { Events } from '@/constants/Events';
-import { GameLevel } from '@/constants/GameLevels';
+import { EffectSetup, Events } from '@/constants/Events';
 import PlaceholderSet from '@/components/PlaceholderSet';
+import { ColorCallback, SetCallback } from '@/constants/HexCodes';
+import { GameLevel, LevelCallback } from '@/constants/GameLevels';
 import { PropComponent, Props } from '@/components/PropComponent';
 
 interface SetListProps extends Props {
@@ -22,22 +24,16 @@ interface SetListProps extends Props {
     solution: string[];
 }
 
-type EffectSetup = () => void;
-type ColorCallback = (hexCode: string) => void;
-type LevelCallback = (level: number) => void;
-type SetCallback = (set: string[]) => void;
-type SetsCallback = (sets: EvaluatedSetObject[]) => void;
-
-type ResetHandler = (setSets: SetsCallback) => LevelCallback;
+type ResetHandler = (setSets: EvaluatedSetsCallback) => LevelCallback;
 type AddColorHandler = (
     colors: string[],
     setColors: SetCallback,
     maxColors: number,
-    addSet: SetCallback
+    submitSet: SetCallback
 ) => ColorCallback;
 type SubmitSetHandler = (
     sets: EvaluatedSetObject[],
-    setSets: SetsCallback,
+    setSets: EvaluatedSetsCallback,
     solution: string[]
 ) => SetCallback;
 type SizeChangeHandler = (viewRef: RefObject<ScrollView | null>) => EffectSetup;
@@ -73,7 +69,7 @@ const getFoundEffectHandler: FoundEffectSetup = (
 };
 
 const getResetHandler: ResetHandler = (
-    setSets: SetsCallback
+    setSets: EvaluatedSetsCallback
 ): LevelCallback => {
     return (): void => {
         setSets([]);
@@ -104,7 +100,7 @@ const getSizeChangeHandler: SizeChangeHandler = (
 
 const getSubmitHandler: SubmitSetHandler = (
     sets: EvaluatedSetObject[],
-    setSets: SetsCallback,
+    setSets: EvaluatedSetsCallback,
     solution: string[]
 ): SetCallback => {
     return (current: string[]): void => {

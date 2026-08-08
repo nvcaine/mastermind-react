@@ -8,6 +8,8 @@ export enum HexCodes {
 }
 
 type Shuffler = (maxColors: number, availableColors: number) => string[];
+export type ColorCallback = (color: string) => void;
+export type SetCallback = (colorSet: string[]) => void;
 
 export const getRandomColors: Shuffler = (
     maxColors: number,
