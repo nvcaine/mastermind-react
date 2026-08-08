@@ -1,20 +1,20 @@
-import React, { RefObject, useEffect, useRef, useState } from 'react';
 import {
     EmitterSubscription,
     NativeEventEmitter,
     ScrollView,
     StyleSheet
 } from 'react-native';
-import { Events } from '@/constants/Events';
-import { PropComponent, Props } from '@/components/PropComponent';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import EvaluatedSet, {
     evaluate,
     EvaluatedSetObject,
     getSetElement
 } from '@/components/EvaluatedSet';
 import { View } from '@/components/Themed';
-import PlaceholderSet from '@/components/PlaceholderSet';
+import { Events } from '@/constants/Events';
 import { GameLevel } from '@/constants/GameLevels';
+import PlaceholderSet from '@/components/PlaceholderSet';
+import { PropComponent, Props } from '@/components/PropComponent';
 
 interface SetListProps extends Props {
     currentLevel: GameLevel;

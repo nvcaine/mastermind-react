@@ -1,9 +1,9 @@
 import React from 'react';
 import { NativeEventEmitter, StyleSheet } from 'react-native';
 import { View } from '@/components/Themed';
-import { HexCodes } from '@/constants/HexCodes';
 import { Events } from '@/constants/Events';
 import ColorList from '@/components/ColorList';
+import { HexCodes } from '@/constants/HexCodes';
 import { PropComponent, Props } from '@/components/PropComponent';
 
 interface ColorMenuProps extends Props {

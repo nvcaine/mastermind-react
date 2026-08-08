@@ -1,7 +1,7 @@
-import { View } from '@/components/Themed';
 import React from 'react';
-import ColorButton from '@/components/ColorButton';
 import { StyleSheet } from 'react-native';
+import { View } from '@/components/Themed';
+import ColorButton from '@/components/ColorButton';
 import { PropComponent, Props } from '@/components/PropComponent';
 
 type OnPressHandler = (color: string) => void;

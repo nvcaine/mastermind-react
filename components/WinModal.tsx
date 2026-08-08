@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { PropComponent, Props } from '@/components/PropComponent';
 import { MonoText } from '@/components/StyledText';
+import { PropComponent, Props } from '@/components/PropComponent';
 
 interface WinModalProps extends Props {
     visible: boolean;

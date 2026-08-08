@@ -1,9 +1,9 @@
-import { PropComponent, Props } from '@/components/PropComponent';
 import React from 'react';
-import { View } from '@/components/Themed';
-import { MonoText } from '@/components/StyledText';
-import ColorList from '@/components/ColorList';
 import { StyleSheet } from 'react-native';
+import { View } from '@/components/Themed';
+import ColorList from '@/components/ColorList';
+import { MonoText } from '@/components/StyledText';
+import { PropComponent, Props } from '@/components/PropComponent';
 
 interface EvaluatedSetProps extends Props {
     set: EvaluatedSetObject;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { View } from '@/components/Themed';
-import EvaluatedSet, { EvaluatedSetObject } from '@/components/EvaluatedSet';
 import { PropComponent, Props } from '@/components/PropComponent';
+import EvaluatedSet, { EvaluatedSetObject } from '@/components/EvaluatedSet';
 
 export interface PlaceholderSetProps extends Props {
     colorLength: number;

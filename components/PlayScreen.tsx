@@ -5,14 +5,14 @@ import {
     StyleSheet
 } from 'react-native';
 import { View } from '@/components/Themed';
-import ColorMenu from '@/components/ColorMenu';
 import SetList from '@/components/SetList';
-import { PropComponent } from '@/components/PropComponent';
 import { Events } from '@/constants/Events';
 import WinModal from '@/components/WinModal';
-import { GameLevel, GameLevels } from '@/constants/GameLevels';
-import { getRandomColors } from '@/constants/HexCodes';
+import ColorMenu from '@/components/ColorMenu';
 import { MonoText } from '@/components/StyledText';
+import { getRandomColors } from '@/constants/HexCodes';
+import { PropComponent } from '@/components/PropComponent';
+import { GameLevel, GameLevels } from '@/constants/GameLevels';
 
 type EffectSetup = () => void; // duplicate in SetList
 type ShowModalCallback = (showModal: boolean) => void;
