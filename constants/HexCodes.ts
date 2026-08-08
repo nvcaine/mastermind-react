@@ -13,8 +13,6 @@ export const getRandomColors: Shuffler = (
     maxColors: number,
     availableColors: number
 ): string[] => {
-    console.log('Get colors', maxColors, availableColors)
-
     const result: string[] = [];
     const colors: string[] = Object.values(HexCodes).slice(0, availableColors);
 

@@ -11,21 +11,24 @@ import { PropComponent } from '@/components/PropComponent';
 import { Events } from '@/constants/Events';
 import WinModal from '@/components/WinModal';
 import { GameLevel, GameLevels } from '@/constants/GameLevels';
+import { getRandomColors } from '@/constants/HexCodes';
+import { MonoText } from '@/components/StyledText';
 
 type EffectSetup = () => void; // duplicate in SetList
 type ShowModalCallback = (showModal: boolean) => void;
-type SetLevelCallback = (level: number) => void;
+type SetLevelCallback = (levelIndex: number) => void;
+type SetSolutionCallback = (solution: string[]) => void;
 
 type CloseHandler = (
     emitter: NativeEventEmitter,
     showModal: boolean,
     setShowModal: ShowModalCallback,
-    level: number
-) => EffectSetup;
+    setSolution: SetSolutionCallback
+) => SetLevelCallback;
 type NextLevelHandler = (
-    level: number,
+    levelIndex: number,
     setLevel: SetLevelCallback,
-    closeHandler: EffectSetup
+    closeHandler: SetLevelCallback
 ) => EffectSetup;
 
 type FoundEffectSetup = (
@@ -38,27 +41,32 @@ const getOnCloseHandler: CloseHandler = (
     emitter: NativeEventEmitter,
     showModal: boolean,
     setShowModal: ShowModalCallback,
-    level: number
-): EffectSetup => {
-    console.log('Get close handler', level)
-    return (): void => {
-        console.log('Close clicked');
-        setShowModal(!showModal)
-        emitter.emit(Events.RESET_SETS, level);
+    setSolution: SetSolutionCallback
+): SetLevelCallback => {
+    return (levelIndex: number): void => {
+        const currentLevel: GameLevel = GameLevels[levelIndex];
+        const randomColors: string[] = getRandomColors(
+            currentLevel.colorsLength,
+            currentLevel.availableColors
+        );
+
+        setSolution(randomColors);
+        setShowModal(!showModal);
+        emitter.emit(Events.RESET_SETS);
     };
 };
 
 const getOnNextLevelHandler: NextLevelHandler = (
-    level: number,
+    levelIndex: number,
     setLevel: SetLevelCallback,
-    closeHandler: EffectSetup
+    closeHandler: SetLevelCallback
 ): EffectSetup => {
     return (): void => {
-        console.log('Next clicked');
-        if (level < GameLevels.length - 1) {
-            console.log('Inc level');
-            setLevel(level + 1);
-            closeHandler();
+        if (levelIndex < GameLevels.length - 1) {
+            const currentLevel: number = levelIndex + 1;
+
+            closeHandler(currentLevel);
+            setLevel(currentLevel);
         }
     };
 };
@@ -79,17 +87,22 @@ const getFoundEffectSetup: FoundEffectSetup = (
 };
 
 const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
+    const eventEmitter: NativeEventEmitter = new NativeEventEmitter();
+
     const [showModal, setShowModal] = useState<boolean>(false);
     const [level, setLevel] = useState<number>(0);
-
-    const eventEmitter: NativeEventEmitter = new NativeEventEmitter();
     const currentLevel: GameLevel = GameLevels[level];
+    const randomColors: string[] = getRandomColors(
+        currentLevel.colorsLength,
+        currentLevel.availableColors
+    );
+    const [solution, setSolution] = useState<string[]>(randomColors);
 
-    const onCloseHandler: EffectSetup = getOnCloseHandler(
+    const onCloseHandler: SetLevelCallback = getOnCloseHandler(
         eventEmitter,
         showModal,
         setShowModal,
-        level
+        setSolution
     );
     const onNextLevelHandler: EffectSetup = getOnNextLevelHandler(
         level,
@@ -105,19 +118,23 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
 
     useEffect(foundEffect, [showModal]);
 
-    console.log('Init main screen', currentLevel);
-
     return (
         <View style={styles.container}>
             <WinModal
                 visible={showModal}
-                onClose={onCloseHandler}
+                onClose={() => onCloseHandler(level)}
                 onNextLevel={onNextLevelHandler}
+                showNext={level < GameLevels.length - 1}
             />
+            <View style={styles.heading}>
+                <MonoText>
+                    Level: {level + 1} ({currentLevel.colorsLength} colors)
+                </MonoText>
+            </View>
             <SetList
                 emitter={eventEmitter}
-                colorsLength={currentLevel.colorsLength}
-                availableColors={currentLevel.availableColors}
+                currentLevel={currentLevel}
+                solution={solution}
             />
             <ColorMenu
                 emitter={eventEmitter}
@@ -132,6 +149,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
         flexDirection: 'column'
+    },
+    heading: {
+        alignItems: 'center'
     }
 });
 

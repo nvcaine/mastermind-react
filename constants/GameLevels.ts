@@ -15,5 +15,9 @@ export const GameLevels: GameLevel[] = [
     {
         availableColors: 5,
         colorsLength: 3
+    },
+    {
+        availableColors: 5,
+        colorsLength: 4
     }
 ];

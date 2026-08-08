@@ -7,12 +7,28 @@ interface WinModalProps extends Props {
     visible: boolean;
     onClose: () => void;
     onNextLevel: () => void;
+    showNext: boolean;
 }
 
 const WinModal: PropComponent<WinModalProps> = (
     props: WinModalProps
 ): React.JSX.Element => {
-    const { visible, onClose, onNextLevel } = props;
+    const { visible, onClose, onNextLevel, showNext } = props;
+
+    const replayButton: React.JSX.Element = (
+        <Pressable onPress={onClose} style={styles.button}>
+            <MonoText>Replay</MonoText>
+        </Pressable>
+    );
+
+    const buttons: React.JSX.Element = (
+        <View style={styles.buttons}>
+            <Pressable onPress={onNextLevel} style={styles.button}>
+                <MonoText>Next</MonoText>
+            </Pressable>
+            {replayButton}
+        </View>
+    );
 
     return (
         <Modal animationType={'fade'} transparent={true} visible={visible}>
@@ -21,14 +37,7 @@ const WinModal: PropComponent<WinModalProps> = (
                     <MonoText style={styles.label}>
                         You found the solution!
                     </MonoText>
-                    <View>
-                        <Pressable onPress={onNextLevel} style={styles.button}>
-                            <MonoText>Next</MonoText>
-                        </Pressable>
-                        <Pressable onPress={onClose} style={styles.button}>
-                            <MonoText>Replay</MonoText>
-                        </Pressable>
-                    </View>
+                    {showNext ? buttons : replayButton}
                 </View>
             </View>
         </Modal>
@@ -54,6 +63,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#29c',
         padding: 10,
         marginHorizontal: 10
+    },
+    buttons: {
+        alignItems: 'stretch',
+        flexDirection: 'row'
     }
 });
 
