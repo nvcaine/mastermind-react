@@ -12,17 +12,19 @@ import { Events } from '@/constants/Events';
 import WinModal from '@/components/WinModal';
 import { HexCodes } from '@/constants/HexCodes';
 
-type ShowModalSetter = (showModal: boolean) => void;
+type ShowModalCallback = (showModal: boolean) => void;
 type EffectSetup = () => void; // duplicate in SetList
+
+type Toggler = (
+    showModal: boolean,
+    setShowModal: (showModal: boolean) => void
+) => void;
+
 type FoundEffectSetup = (
     emitter: NativeEventEmitter,
     showModal: boolean,
     setShowModal: (showModal: boolean) => void
 ) => EffectSetup;
-type Toggler = (
-    showModal: boolean,
-    setShowModal: (showModal: boolean) => void
-) => void;
 
 const toggleModal: Toggler = (
     showModal: boolean,
@@ -45,7 +47,7 @@ const getOnCloseHandler: FoundEffectSetup = (
 const getFoundEffectSetup: FoundEffectSetup = (
     emitter: NativeEventEmitter,
     showModal: boolean,
-    setShowModal: ShowModalSetter
+    setShowModal: ShowModalCallback
 ) => {
     return (): EffectSetup => {
         const subscription: EventSubscription = emitter.addListener(
@@ -67,7 +69,7 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
         showModal,
         setShowModal
     );
-    const onPressHandler: EffectSetup = getOnCloseHandler(
+    const onCloseHandler: EffectSetup = getOnCloseHandler(
         eventEmitter,
         showModal,
         setShowModal
@@ -80,7 +82,7 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
 
     return (
         <View style={styles.container}>
-            <WinModal visible={showModal} onPress={onPressHandler} />
+            <WinModal visible={showModal} onPress={onCloseHandler} />
             <SetList emitter={eventEmitter} maxColors={maxColors} />
             <ColorMenu
                 emitter={eventEmitter}

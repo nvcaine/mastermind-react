@@ -48,7 +48,7 @@ type AddColorEffectSetup = (
     emitter: NativeEventEmitter,
     onAddColor: ColorCallback
 ) => EffectSetup;
-type WinEffectSetup = (
+type FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
@@ -58,7 +58,7 @@ type ResetEffectSetup = (
     onReset: ColorCallback
 ) => EffectSetup;
 
-const getWinEffectHandler: WinEffectSetup = (
+const getFoundEffectHandler: FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
@@ -118,7 +118,7 @@ const getSubmitHandler: SubmitSetHandler = (
     return (current: string[]): void => {
         const result: EvaluatedSetObject = evaluate(current, solution);
 
-        setSets(sets.concat([result]));
+        setSets(sets.concat(result));
     };
 };
 
@@ -178,7 +178,7 @@ const SetList: PropComponent<SetListProps> = (
         setSolution,
         maxColors
     );
-    const winEffect: EffectSetup = getWinEffectHandler(
+    const foundEffect: EffectSetup = getFoundEffectHandler(
         emitter,
         sets,
         maxColors
@@ -194,7 +194,7 @@ const SetList: PropComponent<SetListProps> = (
     const viewRef: RefObject<ScrollView | null> = useRef<ScrollView>(null);
     const currentSet: EvaluatedSetObject = { colors, correct: 0, offset: 0 };
 
-    useEffect(winEffect, [sets]);
+    useEffect(foundEffect, [sets]);
     useEffect(resetEffect, []);
     useEffect(addColorEffect, [colors]);
 
