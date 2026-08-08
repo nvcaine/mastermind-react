@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View } from '@/components/Themed';
 import { NativeEventEmitter, StyleSheet } from 'react-native';
 import { HexCodes } from '@/constants/HexCodes';
@@ -8,48 +8,29 @@ import { PropComponent, Props } from '@/components/PropComponent';
 
 interface ColorMenuProps extends Props {
     emitter: NativeEventEmitter;
-    maxColors: number;
+    availableColors: number;
 }
 
 type ColorSetter = (hexCode: string) => void;
-type ColorsSetter = (colors: string[]) => void;
 
-const getOnPressHandler = (
-    emitter: NativeEventEmitter,
-    colors: string[],
-    setColors: ColorsSetter,
-    maxColors: number
-): ColorSetter => {
+const getOnPressHandler = (emitter: NativeEventEmitter): ColorSetter => {
     return (hexCode: string): void => {
-        const currentColors: string[] = colors.concat([hexCode]);
-
-        setColors(currentColors);
-        console.log('Current colors:', currentColors);
-
-        if (currentColors.length === maxColors) {
-            emitter.emit(Events.SUBMIT_SET, currentColors);
-            setColors([]);
-            console.log('Submitted colors:', currentColors);
-        }
+        emitter.emit(Events.ADD_COLOR, hexCode);
     };
 };
 
 const ColorMenu: PropComponent<ColorMenuProps> = (
     props: ColorMenuProps
 ): React.JSX.Element => {
-    const [colors, setColors] = useState<string[]>([]);
-    const { emitter, maxColors } = props;
-    const hexCodes: string[] = Object.values(HexCodes);
-    const onPress: ColorSetter = getOnPressHandler(
-        emitter,
-        colors,
-        setColors,
-        maxColors
+    const { emitter, availableColors } = props;
+    const hexCodes: string[] = Object.values(HexCodes).slice(
+        0,
+        availableColors
     );
+    const onPress: ColorSetter = getOnPressHandler(emitter);
 
     return (
         <View style={styles.container}>
-            <ColorList colors={colors} disabled={true} />
             <ColorList colors={hexCodes} onPress={onPress} />
         </View>
     );
@@ -61,4 +42,5 @@ const styles = StyleSheet.create({
         marginTop: 20
     }
 });
+
 export default ColorMenu;

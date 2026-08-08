@@ -7,70 +7,62 @@ import {
 } from 'react-native';
 import { Events } from '@/constants/Events';
 import { PropComponent, Props } from '@/components/PropComponent';
-import { HexCodes } from '@/constants/HexCodes';
-import EvaluatedSet, { EvaluatedSetObject } from '@/components/EvaluatedSet';
+import { getRandomColors } from '@/constants/HexCodes';
+import EvaluatedSet, {
+    evaluate,
+    EvaluatedSetObject,
+    getSetElement
+} from '@/components/EvaluatedSet';
+import { View } from '@/components/Themed';
+import PlaceholderSet from '@/components/PlaceholderSet';
 
 interface SetListProps extends Props {
     emitter: NativeEventEmitter;
     maxColors: number;
 }
 
-type SetSetter = (set: string[]) => void;
-type SetsSetter = (sets: EvaluatedSetObject[]) => void;
 type EffectSetup = () => void;
-type SubmitHandler = (
+type ColorCallback = (hexCode: string) => void;
+type SetCallback = (set: string[]) => void;
+type SetsCallback = (sets: EvaluatedSetObject[]) => void;
+
+type ResetHandler = (
+    setSets: SetsCallback,
+    setSolution: SetCallback,
+    maxColors: number
+) => ColorCallback;
+type AddColorHandler = (
+    colors: string[],
+    setColors: SetCallback,
+    maxColors: number,
+    addSet: SetCallback
+) => ColorCallback;
+type SubmitSetHandler = (
     sets: EvaluatedSetObject[],
-    setter: SetsSetter,
+    setSets: SetsCallback,
     solution: string[]
-) => SetSetter;
+) => SetCallback;
 type SizeChangeHandler = (viewRef: RefObject<ScrollView | null>) => EffectSetup;
-type SubmitEffectSetup = (
+
+type AddColorEffectSetup = (
     emitter: NativeEventEmitter,
-    onSubmitSet: SetSetter
+    onAddColor: ColorCallback
 ) => EffectSetup;
-type WinEffectSetup = (
+type FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
 ) => EffectSetup;
 type ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    setSets: SetsSetter,
-    setSolution: SetSetter,
-    maxColors: number
+    onReset: ColorCallback
 ) => EffectSetup;
-type Mapper = (set: EvaluatedSetObject, index: number) => React.JSX.Element;
-type Shuffler = (maxColors: number) => string[];
-type Checker = (colors: string[], solution: string[]) => EvaluatedSetObject;
 
-const getSetElement: Mapper = (set: EvaluatedSetObject, index: number) => (
-    <EvaluatedSet set={set} key={index} />
-);
-
-const getRandomColors: Shuffler = (maxColors: number): string[] => {
-    const result: string[] = [];
-    const colors: string[] = Object.values(HexCodes);
-
-    for (let i: number = 0; i < maxColors; i++) {
-        let index: number = Math.floor(Math.random() * colors.length);
-        let currentIndex: number = result.indexOf(colors[index]);
-
-        while (currentIndex !== -1) {
-            index = Math.floor(Math.random() * colors.length);
-            currentIndex = result.indexOf(colors[index]);
-        }
-
-        result.push(colors[index]);
-    }
-
-    return result;
-};
-
-const getWinEffectHandler: WinEffectSetup = (
+const getFoundEffectHandler: FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
-) => {
+): EffectSetup => {
     return (): EffectSetup => {
         const lastSet: EvaluatedSetObject | undefined = sets.at(-1);
 
@@ -82,72 +74,27 @@ const getWinEffectHandler: WinEffectSetup = (
     };
 };
 
-const evaluate: Checker = (
-    colors: string[],
-    solution: string[]
-): EvaluatedSetObject => {
-    let correct: number = 0;
-    let offset: number = 0;
+const getResetHandler: ResetHandler = (
+    setSets: SetsCallback,
+    setSolution: SetCallback,
+    maxColors: number
+): ColorCallback => {
+    return (): void => {
+        const randomColors: string[] = getRandomColors(maxColors);
 
-    for (let i: number = 0; i < colors.length; i++) {
-        if (colors[i] === solution[i]) {
-            correct++;
-            continue;
-        }
-
-        for (let j: number = 0; j < solution.length; j++) {
-            if (colors[i] === solution[j] && i !== j) {
-                offset++;
-            }
-        }
-    }
-
-    console.log('Evaluated:', colors, correct, offset);
-
-    return { colors, correct, offset };
-};
-
-const getSubmitHandler: SubmitHandler = (
-    sets: EvaluatedSetObject[],
-    setter: SetsSetter,
-    solution: string[]
-): SetSetter => {
-    return (colors: string[]): void => {
-        const result: EvaluatedSetObject = evaluate(colors, solution);
-
-        setter(sets.concat([result]));
-    };
-};
-
-const getSubmitEffectHandler: SubmitEffectSetup = (
-    emitter: NativeEventEmitter,
-    onSubmitSet: SetSetter
-): EffectSetup => {
-    return (): EffectSetup => {
-        const subscription: EmitterSubscription = emitter.addListener(
-            Events.SUBMIT_SET,
-            onSubmitSet
-        );
-
-        return (): void => subscription.remove();
+        setSolution(randomColors);
+        setSets([]);
     };
 };
 
 const getResetEffectHandler: ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    setSets: SetsSetter,
-    setSolution: SetSetter,
-    maxColors: number
-) => {
+    onReset: ColorCallback
+): EffectSetup => {
     return () => {
         const subscription: EmitterSubscription = emitter.addListener(
             Events.RESET_SETS,
-            (): void => {
-                const randomColors: string[] = getRandomColors(maxColors);
-
-                setSolution(randomColors);
-                setSets([]);
-            }
+            onReset
         );
 
         return () => subscription.remove();
@@ -156,9 +103,54 @@ const getResetEffectHandler: ResetEffectSetup = (
 
 const getSizeChangeHandler: SizeChangeHandler = (
     viewRef: RefObject<ScrollView | null>
-) => {
+): EffectSetup => {
     return (): void => {
+        console.log('Size changed');
         viewRef.current?.scrollToEnd({ animated: true });
+    };
+};
+
+const getSubmitHandler: SubmitSetHandler = (
+    sets: EvaluatedSetObject[],
+    setSets: SetsCallback,
+    solution: string[]
+): SetCallback => {
+    return (current: string[]): void => {
+        const result: EvaluatedSetObject = evaluate(current, solution);
+
+        setSets(sets.concat(result));
+    };
+};
+
+const getAddColorHandler: AddColorHandler = (
+    colors: string[],
+    setColors: SetCallback,
+    maxColors: number,
+    submitHandler: SetCallback
+): ColorCallback => {
+    return (hexCode: string): void => {
+        const current: string[] = colors.concat(hexCode);
+
+        setColors(current);
+
+        if (current.length === maxColors) {
+            submitHandler(current);
+            setColors([]);
+        }
+    };
+};
+
+const getAddColorEffectHandler: AddColorEffectSetup = (
+    emitter: NativeEventEmitter,
+    onAddColor: ColorCallback
+): EffectSetup => {
+    return () => {
+        const subscription: EmitterSubscription = emitter.addListener(
+            Events.ADD_COLOR,
+            onAddColor
+        );
+
+        return () => subscription.remove();
     };
 };
 
@@ -169,44 +161,68 @@ const SetList: PropComponent<SetListProps> = (
     const randomColors: string[] = getRandomColors(maxColors);
     const [sets, setSets] = useState<EvaluatedSetObject[]>([]);
     const [solution, setSolution] = useState<string[]>(randomColors);
-    const onSubmitSet: SetSetter = getSubmitHandler(sets, setSets, solution);
-    const submitHandler: EffectSetup = getSubmitEffectHandler(
-        emitter,
-        onSubmitSet
-    );
-    const winHandler: EffectSetup = getWinEffectHandler(
-        emitter,
+    const [colors, setColors] = useState<string[]>([]);
+    const submitSetHandler: SetCallback = getSubmitHandler(
         sets,
-        maxColors
+        setSets,
+        solution
     );
-    const resetHandler: EffectSetup = getResetEffectHandler(
-        emitter,
+    const addColorHandler: ColorCallback = getAddColorHandler(
+        colors,
+        setColors,
+        maxColors,
+        submitSetHandler
+    );
+    const resetHandler: ColorCallback = getResetHandler(
         setSets,
         setSolution,
         maxColors
     );
+    const foundEffect: EffectSetup = getFoundEffectHandler(
+        emitter,
+        sets,
+        maxColors
+    );
+    const resetEffect: EffectSetup = getResetEffectHandler(
+        emitter,
+        resetHandler
+    );
+    const addColorEffect: EffectSetup = getAddColorEffectHandler(
+        emitter,
+        addColorHandler
+    );
     const viewRef: RefObject<ScrollView | null> = useRef<ScrollView>(null);
+    const currentSet: EvaluatedSetObject = { colors, correct: 0, offset: 0 };
 
-    useEffect(submitHandler, [sets]);
-    useEffect(winHandler, [sets]);
-    useEffect(resetHandler, []);
+    useEffect(foundEffect, [sets]);
+    useEffect(resetEffect, []);
+    useEffect(addColorEffect, [colors]);
 
     console.log(solution);
 
     return (
-        <ScrollView
-            contentContainerStyle={styles.container}
-            ref={viewRef}
-            onContentSizeChange={getSizeChangeHandler(viewRef)}
-        >
-            {sets.map(getSetElement)}
-        </ScrollView>
+        <View style={styles.container}>
+            <ScrollView
+                contentContainerStyle={styles.scroll}
+                ref={viewRef}
+                onContentSizeChange={getSizeChangeHandler(viewRef)}
+            >
+                {sets.map(getSetElement)}
+
+                <PlaceholderSet />
+
+                <EvaluatedSet set={currentSet} hideLabels={true} />
+            </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        alignItems: 'center',
+        flex: 1
+    },
+    scroll: {
         alignItems: 'flex-start'
     }
 });
