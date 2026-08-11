@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mmind2",
-    "slug": "mmind2",
+    "name": "mastermind-react",
+    "slug": "mastermind-react",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -22,7 +22,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.romi.halasz.mastermindreact"
     },
     "web": {
       "bundler": "metro",
@@ -34,6 +35,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8514f0ac-d980-4f76-abc9-698b8b5736ef"
+      }
+    },
+    "owner": "romi.halasz"
   }
 }
