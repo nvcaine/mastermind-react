@@ -1,22 +1,25 @@
-import { View } from '@/components/Themed';
 import React from 'react';
-import ColorButton from '@/components/ColorButton';
 import { StyleSheet } from 'react-native';
+import { View } from '@/components/Themed';
+import ColorButton from '@/components/ColorButton';
+import { EventParamCallback } from '@/constants/Events';
 import { PropComponent, Props } from '@/components/PropComponent';
 
-type OnPressHandler = (color: string) => void;
 type Renderer = (hexCode: string, index: number) => React.JSX.Element;
-type Mapper = (onPress?: OnPressHandler, disabled?: boolean) => Renderer;
+type Mapper = (
+    onPress?: EventParamCallback<string>,
+    disabled?: boolean
+) => Renderer;
 
 interface ColorListProps extends Props {
     colors: string[];
-    onPress?: OnPressHandler;
+    onPress?: EventParamCallback<string>;
 }
 
 const getColorElement: Mapper = (
-    onPress?: OnPressHandler,
+    onPress?: EventParamCallback<string>,
     disabled?: boolean
-) => {
+): Renderer => {
     return (hexCode: string, index: number) => (
         <ColorButton
             color={hexCode}

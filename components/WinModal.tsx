@@ -1,17 +1,35 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { PropComponent, Props } from '@/components/PropComponent';
+import { EventCallback } from '@/constants/Events';
 import { MonoText } from '@/components/StyledText';
+import { PropComponent, Props } from '@/components/PropComponent';
 
 interface WinModalProps extends Props {
     visible: boolean;
-    onPress: () => void;
+    onClose: EventCallback;
+    onNextLevel: EventCallback;
+    showNext: boolean;
 }
 
 const WinModal: PropComponent<WinModalProps> = (
     props: WinModalProps
 ): React.JSX.Element => {
-    const { visible, onPress } = props;
+    const { visible, onClose, onNextLevel, showNext } = props;
+
+    const replayButton: React.JSX.Element = (
+        <Pressable onPress={onClose} style={styles.button}>
+            <MonoText>Replay</MonoText>
+        </Pressable>
+    );
+
+    const buttons: React.JSX.Element = (
+        <View style={styles.buttons}>
+            <Pressable onPress={onNextLevel} style={styles.button}>
+                <MonoText>Next</MonoText>
+            </Pressable>
+            {replayButton}
+        </View>
+    );
 
     return (
         <Modal animationType={'fade'} transparent={true} visible={visible}>
@@ -20,11 +38,7 @@ const WinModal: PropComponent<WinModalProps> = (
                     <MonoText style={styles.label}>
                         You found the solution!
                     </MonoText>
-                    <View>
-                        <Pressable onPress={onPress} style={styles.button}>
-                            <MonoText>Close</MonoText>
-                        </Pressable>
-                    </View>
+                    {showNext ? buttons : replayButton}
                 </View>
             </View>
         </Modal>
@@ -48,7 +62,12 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#29c',
-        padding: 10
+        padding: 10,
+        marginHorizontal: 10
+    },
+    buttons: {
+        alignItems: 'stretch',
+        flexDirection: 'row'
     }
 });
 

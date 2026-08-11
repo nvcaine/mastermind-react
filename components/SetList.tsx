@@ -1,69 +1,65 @@
-import React, { RefObject, useEffect, useRef, useState } from 'react';
 import {
     EmitterSubscription,
     NativeEventEmitter,
     ScrollView,
     StyleSheet
 } from 'react-native';
-import { Events } from '@/constants/Events';
-import { PropComponent, Props } from '@/components/PropComponent';
-import { getRandomColors } from '@/constants/HexCodes';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import EvaluatedSet, {
     evaluate,
     EvaluatedSetObject,
     getSetElement
 } from '@/components/EvaluatedSet';
 import { View } from '@/components/Themed';
+import { GameLevel } from '@/constants/GameLevels';
 import PlaceholderSet from '@/components/PlaceholderSet';
+import { PropComponent, Props } from '@/components/PropComponent';
+import { EventParamCallback, EventCallback, Events } from '@/constants/Events';
 
 interface SetListProps extends Props {
+    currentLevel: GameLevel;
     emitter: NativeEventEmitter;
-    maxColors: number;
+    solution: string[];
 }
 
-type EffectSetup = () => void;
-type ColorCallback = (hexCode: string) => void;
-type SetCallback = (set: string[]) => void;
-type SetsCallback = (sets: EvaluatedSetObject[]) => void;
-
 type ResetHandler = (
-    setSets: SetsCallback,
-    setSolution: SetCallback,
-    maxColors: number
-) => ColorCallback;
+    setSets: EventParamCallback<EvaluatedSetObject[]>
+) => EventParamCallback<number>;
 type AddColorHandler = (
     colors: string[],
-    setColors: SetCallback,
+    setColors: EventParamCallback<string[]>,
     maxColors: number,
-    addSet: SetCallback
-) => ColorCallback;
+    submitSet: EventParamCallback<string[]>
+) => EventParamCallback<string>;
 type SubmitSetHandler = (
     sets: EvaluatedSetObject[],
-    setSets: SetsCallback,
+    setSets: EventParamCallback<EvaluatedSetObject[]>,
     solution: string[]
-) => SetCallback;
-type SizeChangeHandler = (viewRef: RefObject<ScrollView | null>) => EffectSetup;
+) => EventParamCallback<string[]>;
+type SizeChangeHandler = (
+    viewRef: RefObject<ScrollView | null>
+) => EventCallback;
 
 type AddColorEffectSetup = (
     emitter: NativeEventEmitter,
-    onAddColor: ColorCallback
-) => EffectSetup;
+    onAddColor: EventParamCallback<string>
+) => EventCallback;
 type FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
-) => EffectSetup;
+) => EventCallback;
 type ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    onReset: ColorCallback
-) => EffectSetup;
+    onReset: EventParamCallback<number>
+) => EventCallback;
 
 const getFoundEffectHandler: FoundEffectSetup = (
     emitter: NativeEventEmitter,
     sets: EvaluatedSetObject[],
     maxColors: number
-): EffectSetup => {
-    return (): EffectSetup => {
+): EventCallback => {
+    return (): EventCallback => {
         const lastSet: EvaluatedSetObject | undefined = sets.at(-1);
 
         if (lastSet?.correct === maxColors) {
@@ -75,22 +71,17 @@ const getFoundEffectHandler: FoundEffectSetup = (
 };
 
 const getResetHandler: ResetHandler = (
-    setSets: SetsCallback,
-    setSolution: SetCallback,
-    maxColors: number
-): ColorCallback => {
+    setSets: EventParamCallback<EvaluatedSetObject[]>
+): EventParamCallback<number> => {
     return (): void => {
-        const randomColors: string[] = getRandomColors(maxColors);
-
-        setSolution(randomColors);
         setSets([]);
     };
 };
 
 const getResetEffectHandler: ResetEffectSetup = (
     emitter: NativeEventEmitter,
-    onReset: ColorCallback
-): EffectSetup => {
+    onReset: EventParamCallback<number>
+): EventCallback => {
     return () => {
         const subscription: EmitterSubscription = emitter.addListener(
             Events.RESET_SETS,
@@ -103,18 +94,17 @@ const getResetEffectHandler: ResetEffectSetup = (
 
 const getSizeChangeHandler: SizeChangeHandler = (
     viewRef: RefObject<ScrollView | null>
-): EffectSetup => {
+): EventCallback => {
     return (): void => {
-        console.log('Size changed');
         viewRef.current?.scrollToEnd({ animated: true });
     };
 };
 
 const getSubmitHandler: SubmitSetHandler = (
     sets: EvaluatedSetObject[],
-    setSets: SetsCallback,
+    setSets: EventParamCallback<EvaluatedSetObject[]>,
     solution: string[]
-): SetCallback => {
+): EventParamCallback<string[]> => {
     return (current: string[]): void => {
         const result: EvaluatedSetObject = evaluate(current, solution);
 
@@ -124,10 +114,10 @@ const getSubmitHandler: SubmitSetHandler = (
 
 const getAddColorHandler: AddColorHandler = (
     colors: string[],
-    setColors: SetCallback,
+    setColors: EventParamCallback<string[]>,
     maxColors: number,
-    submitHandler: SetCallback
-): ColorCallback => {
+    submitHandler: EventParamCallback<string[]>
+): EventParamCallback<string> => {
     return (hexCode: string): void => {
         const current: string[] = colors.concat(hexCode);
 
@@ -142,8 +132,8 @@ const getAddColorHandler: AddColorHandler = (
 
 const getAddColorEffectHandler: AddColorEffectSetup = (
     emitter: NativeEventEmitter,
-    onAddColor: ColorCallback
-): EffectSetup => {
+    onAddColor: EventParamCallback<string>
+): EventCallback => {
     return () => {
         const subscription: EmitterSubscription = emitter.addListener(
             Events.ADD_COLOR,
@@ -157,37 +147,31 @@ const getAddColorEffectHandler: AddColorEffectSetup = (
 const SetList: PropComponent<SetListProps> = (
     props: SetListProps
 ): React.JSX.Element => {
-    const { emitter, maxColors } = props;
-    const randomColors: string[] = getRandomColors(maxColors);
+    const { emitter, currentLevel, solution } = props;
     const [sets, setSets] = useState<EvaluatedSetObject[]>([]);
-    const [solution, setSolution] = useState<string[]>(randomColors);
     const [colors, setColors] = useState<string[]>([]);
-    const submitSetHandler: SetCallback = getSubmitHandler(
+    const submitSetHandler: EventParamCallback<string[]> = getSubmitHandler(
         sets,
         setSets,
         solution
     );
-    const addColorHandler: ColorCallback = getAddColorHandler(
+    const addColorHandler: EventParamCallback<string> = getAddColorHandler(
         colors,
         setColors,
-        maxColors,
+        currentLevel.colorsLength,
         submitSetHandler
     );
-    const resetHandler: ColorCallback = getResetHandler(
-        setSets,
-        setSolution,
-        maxColors
-    );
-    const foundEffect: EffectSetup = getFoundEffectHandler(
+    const resetHandler: EventParamCallback<number> = getResetHandler(setSets);
+    const foundEffect: EventCallback = getFoundEffectHandler(
         emitter,
         sets,
-        maxColors
+        currentLevel.colorsLength
     );
-    const resetEffect: EffectSetup = getResetEffectHandler(
+    const resetEffect: EventCallback = getResetEffectHandler(
         emitter,
         resetHandler
     );
-    const addColorEffect: EffectSetup = getAddColorEffectHandler(
+    const addColorEffect: EventCallback = getAddColorEffectHandler(
         emitter,
         addColorHandler
     );
@@ -198,7 +182,7 @@ const SetList: PropComponent<SetListProps> = (
     useEffect(resetEffect, []);
     useEffect(addColorEffect, [colors]);
 
-    console.log(solution);
+    console.log('Solution', solution);
 
     return (
         <View style={styles.container}>
@@ -209,7 +193,7 @@ const SetList: PropComponent<SetListProps> = (
             >
                 {sets.map(getSetElement)}
 
-                <PlaceholderSet />
+                <PlaceholderSet colorLength={currentLevel.colorsLength} />
 
                 <EvaluatedSet set={currentSet} hideLabels={true} />
             </ScrollView>
