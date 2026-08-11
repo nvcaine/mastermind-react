@@ -11,7 +11,9 @@ interface ColorMenuProps extends Props {
     availableColors: number;
 }
 
-const getOnPressHandler = (
+type PressHandler = (emitter: NativeEventEmitter) => EventParamCallback<string>;
+
+const getOnPressHandler: PressHandler = (
     emitter: NativeEventEmitter
 ): EventParamCallback<string> => {
     return (hexCode: string): void => {
