@@ -204,6 +204,7 @@ const SetList: PropComponent<SetListProps> = (
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
+        backgroundColor: '#1A1A1A',
         flex: 1
     },
     scroll: {

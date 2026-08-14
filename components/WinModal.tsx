@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     icon: {
         color: '#fff',
         fontSize: 15,
-        lineHeight: 20,
+        lineHeight: 24,
         paddingHorizontal: 5
     }
 });

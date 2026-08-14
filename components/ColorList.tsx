@@ -44,6 +44,7 @@ const ColorList: PropComponent<ColorListProps> = (
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: 'transparent',
         flexDirection: 'row'
     }
 });

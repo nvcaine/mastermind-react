@@ -26,6 +26,7 @@ const getButtonStyle = (color: string) =>
     StyleSheet.create({
         button: {
             backgroundImage: 'radial-gradient(circle at 50%, ' + color + ', ' + color + ' 30%, #000 100%)',
+            experimental_backgroundImage: 'radial-gradient(circle at 50%, ' + color + ', ' + color + ' 30%, #000 100%)',
             backgroundColor: color,
             borderRadius: '50%',
             height: 40,

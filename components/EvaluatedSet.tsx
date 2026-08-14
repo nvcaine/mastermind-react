@@ -59,26 +59,37 @@ const EvaluatedSet: PropComponent<EvaluatedSetProps> = (
 
     return (
         <View style={styles.container}>
-            <MonoText style={labelStyle}>{set.correct}</MonoText>
+            <MonoText style={[styles.correct, labelStyle]}>
+                {set.correct}
+            </MonoText>
             <ColorList colors={set.colors} disabled={true} />
-            <MonoText style={labelStyle}>{set.offset}</MonoText>
+            <MonoText style={[styles.offset, labelStyle]}>
+                {set.offset}
+            </MonoText>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: 'transparent',
         flexDirection: 'row',
         paddingVertical: 5
     },
     label: {
         height: 40,
+        fontSize: 16,
         lineHeight: 40,
         paddingHorizontal: 10
     },
+    correct: {
+        color: '#2C4'
+    },
+    offset: {
+        color: '#C44'
+    },
     hidden: {
-        visibility: 'hidden',
-        color: 'black'
+        opacity: 0
     }
 });
 

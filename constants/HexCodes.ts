@@ -1,6 +1,6 @@
 export enum HexCodes {
-    RED = '#FF4400',
-    GREEN = '#22DD00',
+    RED = '#FF4444',
+    GREEN = '#44BB22',
     BLUE = '#0066FF',
     YELLOW = '#FFFF00',
     BEIGE = '#FF9933',
@@ -17,15 +17,10 @@ export const getRandomColors: Shuffler = (
     const colors: string[] = Object.values(HexCodes).slice(0, availableColors);
 
     for (let i: number = 0; i < maxColors; i++) {
-        let index: number = Math.floor(Math.random() * colors.length);
-        let currentIndex: number = result.indexOf(colors[index]);
-
-        while (currentIndex !== -1) {
-            index = Math.floor(Math.random() * colors.length);
-            currentIndex = result.indexOf(colors[index]);
-        }
+        const index: number = Math.floor(Math.random() * colors.length);
 
         result.push(colors[index]);
+        colors.splice(index, 1);
     }
 
     return result;
