@@ -24,13 +24,13 @@ const ColorButton: PropComponent<ColorButtonProps> = (
 
 const getButtonStyle = (color: string) =>
     StyleSheet.create({
-        // duplicate
         button: {
+            backgroundImage: 'radial-gradient(circle at 50%, ' + color + ', ' + color + ' 30%, #000 100%)',
             backgroundColor: color,
-            height: 30,
-            marginLeft: 10,
-            marginRight: 10,
-            width: 30
+            borderRadius: '50%',
+            height: 40,
+            marginHorizontal: 10,
+            width: 40
         }
     });
 

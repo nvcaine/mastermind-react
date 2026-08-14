@@ -41,6 +41,7 @@ const ColorMenu: PropComponent<ColorMenuProps> = (
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
+        marginBottom: 10,
         marginTop: 20
     }
 });

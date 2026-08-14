@@ -72,7 +72,9 @@ const styles = StyleSheet.create({
         paddingVertical: 5
     },
     label: {
-        padding: 5
+        height: 40,
+        lineHeight: 40,
+        paddingHorizontal: 10
     },
     hidden: {
         visibility: 'hidden',

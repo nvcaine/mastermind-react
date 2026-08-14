@@ -207,7 +207,8 @@ const styles = StyleSheet.create({
         flex: 1
     },
     scroll: {
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
+        paddingBottom: 20
     }
 });
 
