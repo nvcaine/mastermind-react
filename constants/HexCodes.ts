@@ -7,7 +7,14 @@ export enum HexCodes {
     TEAL = '#33CC99'
 }
 
+export interface SetData {
+    colors: string[];
+    correct: number; // right color, right position
+    offset: number; // right color, wrong position
+}
+
 type Shuffler = (maxColors: number, availableColors: number) => string[];
+type Checker = (colors: string[], solution: string[]) => SetData;
 
 export const getRandomColors: Shuffler = (
     maxColors: number,
@@ -24,4 +31,29 @@ export const getRandomColors: Shuffler = (
     }
 
     return result;
+};
+
+export const evaluate: Checker = (
+    colors: string[],
+    solution: string[]
+): SetData => {
+    let correct: number = 0;
+    let offset: number = 0;
+
+    for (let i: number = 0; i < colors.length; i++) {
+        if (colors[i] === solution[i]) {
+            correct++;
+            continue;
+        }
+
+        for (let j: number = 0; j < solution.length; j++) {
+            if (colors[i] === solution[j] && i !== j) {
+                offset++;
+            }
+        }
+    }
+
+    console.log('Evaluated:', colors, correct, offset);
+
+    return { colors, correct, offset };
 };

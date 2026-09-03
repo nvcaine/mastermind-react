@@ -12,32 +12,21 @@ import LevelHeading from '@/components/LevelHeading';
 import { getRandomColors } from '@/constants/HexCodes';
 import { PropComponent } from '@/components/PropComponent';
 import { GameLevel, GameLevels } from '@/constants/GameLevels';
-import { EventParamCallback, EventCallback, Events } from '@/constants/Events';
+import {
+    ParamCallback,
+    EventCallback,
+    Events,
+    OnClose,
+    OnNextLevel,
+    WinSetup
+} from '@/constants/Events';
 
-type CloseHandler = (
+const getCloseHandler: OnClose = (
     emitter: NativeEventEmitter,
     showModal: boolean,
-    setShowModal: EventParamCallback<boolean>,
-    setSolution: EventParamCallback<string[]>
-) => EventParamCallback<number>;
-type NextLevelHandler = (
-    levelIndex: number,
-    setLevel: EventParamCallback<number>,
-    closeHandler: EventParamCallback<number>
-) => EventCallback;
-
-type FoundEffectSetup = (
-    emitter: NativeEventEmitter,
-    showModal: boolean,
-    setShowModal: EventParamCallback<boolean>
-) => EventCallback;
-
-const getOnCloseHandler: CloseHandler = (
-    emitter: NativeEventEmitter,
-    showModal: boolean,
-    setShowModal: EventParamCallback<boolean>,
-    setSolution: EventParamCallback<string[]>
-): EventParamCallback<number> => {
+    setShowModal: ParamCallback<boolean>,
+    setSolution: ParamCallback<string[]>
+): ParamCallback<number> => {
     return (levelIndex: number): void => {
         const currentLevel: GameLevel = GameLevels[levelIndex];
         const randomColors: string[] = getRandomColors(
@@ -51,10 +40,10 @@ const getOnCloseHandler: CloseHandler = (
     };
 };
 
-const getOnNextLevelHandler: NextLevelHandler = (
+const getNextLevelHandler: OnNextLevel = (
     levelIndex: number,
-    setLevel: EventParamCallback<number>,
-    closeHandler: EventParamCallback<number>
+    setLevel: ParamCallback<number>,
+    closeHandler: ParamCallback<number>
 ): EventCallback => {
     return (): void => {
         if (levelIndex < GameLevels.length - 1) {
@@ -66,11 +55,11 @@ const getOnNextLevelHandler: NextLevelHandler = (
     };
 };
 
-const getFoundEffectSetup: FoundEffectSetup = (
+const getWinSetup: WinSetup = (
     emitter: NativeEventEmitter,
     showModal: boolean,
-    setShowModal: EventParamCallback<boolean>
-) => {
+    setShowModal: ParamCallback<boolean>
+): EventCallback => {
     return (): EventCallback => {
         const subscription: EventSubscription = emitter.addListener(
             Events.FOUND_SET,
@@ -93,32 +82,32 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
     );
     const [solution, setSolution] = useState<string[]>(randomColors);
 
-    const onCloseHandler: EventParamCallback<number> = getOnCloseHandler(
+    const closeHandler: ParamCallback<number> = getCloseHandler(
         eventEmitter,
         showModal,
         setShowModal,
         setSolution
     );
-    const onNextLevelHandler: EventCallback = getOnNextLevelHandler(
+    const nextLevelHandler: EventCallback = getNextLevelHandler(
         level,
         setLevel,
-        onCloseHandler
+        closeHandler
     );
 
-    const foundEffect: EventCallback = getFoundEffectSetup(
+    const winEffect: EventCallback = getWinSetup(
         eventEmitter,
         showModal,
         setShowModal
     );
 
-    useEffect(foundEffect, [showModal]);
+    useEffect(winEffect, [showModal]);
 
     return (
         <View style={styles.container}>
             <WinModal
                 visible={showModal}
-                onClose={() => onCloseHandler(level)}
-                onNextLevel={onNextLevelHandler}
+                onClose={() => closeHandler(level)}
+                onNextLevel={nextLevelHandler}
                 showNext={level < GameLevels.length - 1}
             />
             <LevelHeading

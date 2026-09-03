@@ -1,7 +1,7 @@
 import React from 'react';
 import { NativeEventEmitter, StyleSheet } from 'react-native';
 import { View } from '@/components/Themed';
-import { EventParamCallback, Events } from '@/constants/Events';
+import { ParamCallback, Events } from '@/constants/Events';
 import ColorList from '@/components/ColorList';
 import { HexCodes } from '@/constants/HexCodes';
 import { PropComponent, Props } from '@/components/PropComponent';
@@ -11,11 +11,11 @@ interface ColorMenuProps extends Props {
     availableColors: number;
 }
 
-type PressHandler = (emitter: NativeEventEmitter) => EventParamCallback<string>;
+type PressHandler = (emitter: NativeEventEmitter) => ParamCallback<string>;
 
 const getOnPressHandler: PressHandler = (
     emitter: NativeEventEmitter
-): EventParamCallback<string> => {
+): ParamCallback<string> => {
     return (hexCode: string): void => {
         emitter.emit(Events.ADD_COLOR, hexCode);
     };
@@ -29,7 +29,7 @@ const ColorMenu: PropComponent<ColorMenuProps> = (
         0,
         availableColors
     );
-    const onPress: EventParamCallback<string> = getOnPressHandler(emitter);
+    const onPress: ParamCallback<string> = getOnPressHandler(emitter);
 
     return (
         <View style={styles.container}>
