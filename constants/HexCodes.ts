@@ -4,7 +4,11 @@ export enum HexCodes {
     BLUE = '#0066FF',
     YELLOW = '#FFFF00',
     BEIGE = '#FF9933',
-    TEAL = '#33CC99'
+    TEAL = '#33CC99',
+    PURPLE = '#9933DD',
+    BROWN = '#994422',
+    WHITE = '#CCCCCC',
+    BLACK = '#333333',
 }
 
 export interface SetData {

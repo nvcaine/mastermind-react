@@ -9,30 +9,18 @@ interface WinModalProps extends Props {
     visible: boolean;
     onClose: EventCallback;
     onNextLevel: EventCallback;
-    showNext: boolean;
+    showRestart: boolean;
 }
 
 const WinModal: PropComponent<WinModalProps> = (
     props: WinModalProps
 ): React.JSX.Element => {
-    const { visible, onClose, onNextLevel, showNext } = props;
-
-    const replayButton: React.JSX.Element = (
-        <Pressable onPress={onClose} style={styles.button}>
-            <MonoText>Replay</MonoText>
-            <FontAwesome name={'rotate-left'} style={styles.icon} />
-        </Pressable>
-    );
-
-    const buttons: React.JSX.Element = (
-        <View style={styles.buttons}>
-            <Pressable onPress={onNextLevel} style={styles.button}>
-                <MonoText>Next level</MonoText>
-                <FontAwesome name={'play'} style={styles.icon} />
-            </Pressable>
-            {replayButton}
-        </View>
-    );
+    const { visible, onClose, onNextLevel, showRestart } = props;
+    const label: string = !showRestart
+        ? 'You found the solution!'
+        : 'You have completed all challenges!';
+    const buttonLabel: string = !showRestart ? 'Next level' : 'Restart';
+    const icon: 'play' | 'backward' = !showRestart ? 'play' : 'backward';
 
     return (
         <Modal animationType={'fade'} transparent={true} visible={visible}>
@@ -40,10 +28,22 @@ const WinModal: PropComponent<WinModalProps> = (
                 <View style={styles.modal}>
                     <MonoText style={styles.label}>Way to go!</MonoText>
 
-                    <MonoText style={styles.label}>
-                        You found the solution!
-                    </MonoText>
-                    {showNext ? buttons : replayButton}
+                    <MonoText style={styles.label}>{label}</MonoText>
+
+                    <View style={styles.buttons}>
+                        <Pressable onPress={onNextLevel} style={styles.button}>
+                            <MonoText>{buttonLabel}</MonoText>
+                            <FontAwesome name={icon} style={styles.icon} />
+                        </Pressable>
+
+                        <Pressable onPress={onClose} style={styles.button}>
+                            <MonoText>Replay</MonoText>
+                            <FontAwesome
+                                name={'rotate-left'}
+                                style={styles.icon}
+                            />
+                        </Pressable>
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     icon: {
         color: '#fff',
         fontSize: 15,
-        lineHeight: 24,
+        lineHeight: 20,
         paddingHorizontal: 5
     }
 });
