@@ -1,7 +1,6 @@
 import React from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View, Text } from 'react-native';
 import { EventCallback } from '@/constants/Events';
-import { MonoText } from '@/components/StyledText';
 import { PropComponent, Props } from '@/components/PropComponent';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
@@ -17,31 +16,71 @@ const WinModal: PropComponent<WinModalProps> = (
 ): React.JSX.Element => {
     const { visible, onClose, onNextLevel, showRestart } = props;
     const label: string = !showRestart
-        ? 'You found the solution!'
-        : 'You have completed all challenges!';
-    const buttonLabel: string = !showRestart ? 'Next level' : 'Restart';
-    const icon: 'play' | 'backward' = !showRestart ? 'play' : 'backward';
+        ? 'You cracked the secret combination!'
+        : 'Congratulations! You beat all levels!';
+    const buttonLabel: string = !showRestart ? 'Next Level' : 'Restart Game';
+    const icon: 'arrow-right' | 'refresh' = !showRestart
+        ? 'arrow-right'
+        : 'refresh';
 
     return (
-        <Modal animationType={'fade'} transparent={true} visible={visible}>
-            <View style={styles.container}>
-                <View style={styles.modal}>
-                    <MonoText style={styles.label}>Way to go!</MonoText>
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose}
+        >
+            <View style={styles.overlay}>
+                <View style={styles.modalCard}>
+                    {/* Glowing Trophy Ring */}
+                    <View style={styles.trophyRing}>
+                        <FontAwesome name="trophy" size={36} color="#F59E0B" />
+                    </View>
 
-                    <MonoText style={styles.label}>{label}</MonoText>
+                    {/* Headline */}
+                    <Text style={styles.title}>
+                        {!showRestart
+                            ? 'CHALLENGE CRACKED!'
+                            : 'MASTERMIND CHAMPION!'}
+                    </Text>
 
-                    <View style={styles.buttons}>
-                        <Pressable onPress={onNextLevel} style={styles.button}>
-                            <MonoText>{buttonLabel}</MonoText>
-                            <FontAwesome name={icon} style={styles.icon} />
+                    {/* Subtitle */}
+                    <Text style={styles.subtitle}>{label}</Text>
+
+                    {/* Action Buttons */}
+                    <View style={styles.buttonsRow}>
+                        <Pressable
+                            onPress={onNextLevel}
+                            style={({ pressed }) => [
+                                styles.primaryButton,
+                                pressed && styles.buttonPressed
+                            ]}
+                        >
+                            <Text style={styles.primaryButtonText}>
+                                {buttonLabel}
+                            </Text>
+                            <FontAwesome
+                                name={icon}
+                                size={14}
+                                color="#FFFFFF"
+                            />
                         </Pressable>
 
-                        <Pressable onPress={onClose} style={styles.button}>
-                            <MonoText>Replay</MonoText>
+                        <Pressable
+                            onPress={onClose}
+                            style={({ pressed }) => [
+                                styles.secondaryButton,
+                                pressed && styles.buttonPressed
+                            ]}
+                        >
                             <FontAwesome
-                                name={'rotate-left'}
-                                style={styles.icon}
+                                name="rotate-left"
+                                size={14}
+                                color="#94A3B8"
                             />
+                            <Text style={styles.secondaryButtonText}>
+                                Replay
+                            </Text>
                         </Pressable>
                     </View>
                 </View>
@@ -51,41 +90,98 @@ const WinModal: PropComponent<WinModalProps> = (
 };
 
 const styles = StyleSheet.create({
-    container: {
-        alignItems: 'center',
-        backdropFilter: 'blur(5px)',
+    overlay: {
         flex: 1,
-        justifyContent: 'center'
-    },
-    modal: {
+        backgroundColor: 'rgba(11, 15, 25, 0.85)',
         alignItems: 'center',
-        backgroundColor: '#333',
+        justifyContent: 'center',
+        padding: 24
+    },
+    modalCard: {
+        width: '100%',
+        maxWidth: 380,
+        backgroundColor: '#1E293B',
+        borderColor: 'rgba(255, 255, 255, 0.12)',
         borderWidth: 1,
-        borderColor: '#555',
-        borderRadius: 5,
-        padding: 20
+        borderRadius: 24,
+        padding: 28,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+        elevation: 10
     },
-    label: {
-        color: '#fff',
-        marginBottom: 20
+    trophyRing: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: 'rgba(245, 158, 11, 0.15)',
+        borderColor: 'rgba(245, 158, 11, 0.35)',
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16
     },
-    button: {
-        backgroundColor: '#29c',
-        borderRadius: 5,
-        flexDirection: 'row',
-        lineHeight: 30,
-        padding: 10,
-        marginHorizontal: 10
+    title: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#F8FAFC',
+        letterSpacing: 1,
+        marginBottom: 8,
+        textAlign: 'center'
     },
-    buttons: {
-        alignItems: 'stretch',
-        flexDirection: 'row'
-    },
-    icon: {
-        color: '#fff',
-        fontSize: 15,
+    subtitle: {
+        fontSize: 14,
+        color: '#94A3B8',
+        textAlign: 'center',
         lineHeight: 20,
-        paddingHorizontal: 5
+        marginBottom: 24
+    },
+    buttonsRow: {
+        width: '100%',
+        gap: 12
+    },
+    primaryButton: {
+        backgroundColor: '#2563EB',
+        borderRadius: 14,
+        paddingVertical: 14,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        shadowColor: '#2563EB',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 4
+    },
+    primaryButtonText: {
+        color: '#FFFFFF',
+        fontSize: 15,
+        fontWeight: '700'
+    },
+    secondaryButton: {
+        backgroundColor: 'rgba(255, 255, 255, 0.06)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        borderRadius: 14,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8
+    },
+    secondaryButtonText: {
+        color: '#CBD5E1',
+        fontSize: 14,
+        fontWeight: '600'
+    },
+    buttonPressed: {
+        opacity: 0.8,
+        transform: [{ scale: 0.98 }]
     }
 });
 

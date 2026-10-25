@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-    EventSubscription,
-    NativeEventEmitter,
-    StyleSheet
-} from 'react-native';
-import { View } from '@/components/Themed';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeEventEmitter, StatusBar, StyleSheet, View } from 'react-native';
+
 import SetList from '@/components/SetList';
 import WinModal from '@/components/WinModal';
 import ColorMenu from '@/components/ColorMenu';
@@ -60,9 +57,8 @@ const getWinSetup: WinSetup = (
     setShowModal: ParamCallback<boolean>
 ): EventCallback => {
     return (): EventCallback => {
-        const subscription: EventSubscription = emitter.addListener(
-            Events.FOUND_SET,
-            (): void => setShowModal(!showModal)
+        const subscription = emitter.addListener(Events.FOUND_SET, (): void =>
+            setShowModal(!showModal)
         );
 
         return () => subscription.remove();
@@ -70,16 +66,16 @@ const getWinSetup: WinSetup = (
 };
 
 const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
-    const eventEmitter: NativeEventEmitter = new NativeEventEmitter();
+    const [eventEmitter] = useState<NativeEventEmitter>(
+        () => new NativeEventEmitter()
+    );
 
     const [showModal, setShowModal] = useState<boolean>(false);
     const [level, setLevel] = useState<number>(FIRST_LEVEL);
     const currentLevel: GameLevel = GameLevels[level];
-    const randomColors: string[] = getRandomColors(
-        currentLevel.colorsLength,
-        currentLevel.availableColors
+    const [solution, setSolution] = useState<string[]>(() =>
+        getRandomColors(currentLevel.colorsLength, currentLevel.availableColors)
     );
-    const [solution, setSolution] = useState<string[]>(randomColors);
 
     const closeHandler: ParamCallback<number> = getCloseHandler(
         eventEmitter,
@@ -102,34 +98,41 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
     useEffect(winEffect, [showModal]);
 
     return (
-        <View style={styles.container}>
-            <WinModal
-                visible={showModal}
-                onClose={() => closeHandler(level)}
-                onNextLevel={nextLevelHandler}
-                showRestart={level === GameLevels.length - 1}
-            />
-            <LevelHeading
-                level={level + 1}
-                colorsLength={currentLevel.colorsLength}
-            />
-            <SetList
-                emitter={eventEmitter}
-                currentLevel={currentLevel}
-                solution={solution}
-            />
-            <ColorMenu
-                emitter={eventEmitter}
-                availableColors={currentLevel.availableColors}
-            />
-        </View>
+        <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="light-content" backgroundColor="#0B0F19" />
+            <View style={styles.container}>
+                <WinModal
+                    visible={showModal}
+                    onClose={() => closeHandler(level)}
+                    onNextLevel={nextLevelHandler}
+                    showRestart={level === GameLevels.length - 1}
+                />
+                <LevelHeading
+                    level={level + 1}
+                    colorsLength={currentLevel.colorsLength}
+                />
+                <SetList
+                    emitter={eventEmitter}
+                    currentLevel={currentLevel}
+                    solution={solution}
+                />
+                <ColorMenu
+                    emitter={eventEmitter}
+                    availableColors={currentLevel.availableColors}
+                />
+            </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        alignItems: 'center',
+    safeArea: {
         flex: 1,
+        backgroundColor: '#0B0F19'
+    },
+    container: {
+        flex: 1,
+        backgroundColor: '#0B0F19',
         flexDirection: 'column'
     }
 });

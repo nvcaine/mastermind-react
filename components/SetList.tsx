@@ -2,10 +2,12 @@ import {
     EmitterSubscription,
     NativeEventEmitter,
     ScrollView,
-    StyleSheet
+    StyleSheet,
+    View,
+    Text
 } from 'react-native';
 import React, { RefObject, useEffect, useRef, useState } from 'react';
-import { View } from '@/components/Themed';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { GameLevel } from '@/constants/GameLevels';
 import { evaluate, SetData } from '@/constants/HexCodes';
 import PlaceholderSet from '@/components/PlaceholderSet';
@@ -20,6 +22,7 @@ import {
     OnSizeChange,
     OnSubmitSet,
     AddColorSetup,
+    UndoColorSetup,
     FoundSetup,
     ResetSetup
 } from '@/constants/Events';
@@ -30,12 +33,6 @@ interface SetListProps extends Props {
     solution: string[];
 }
 
-type Mapper = (set: SetData, index: number) => React.JSX.Element;
-
-const getSetElement: Mapper = (set: SetData, index: number) => (
-    <ColorSet set={set} key={index} />
-);
-
 const getAddColorHandler: OnAddColor = (
     colors: string[],
     setColors: ParamCallback<string[]>,
@@ -43,8 +40,9 @@ const getAddColorHandler: OnAddColor = (
     submitHandler: ParamCallback<string[]>
 ): ParamCallback<string> => {
     return (hexCode: string): void => {
-        const current: string[] = colors.concat(hexCode);
+        if (colors.length >= maxColors) return;
 
+        const current: string[] = colors.concat(hexCode);
         setColors(current);
 
         if (current.length === maxColors) {
@@ -62,7 +60,7 @@ const getResetHandler: OnResetSets = (
     };
 };
 
-const getSizeChangeHandler: OnSizeChange = (
+const getSizeChangeHandler = (
     viewRef: RefObject<ScrollView | null>
 ): EventCallback => {
     return (): void => {
@@ -77,7 +75,6 @@ const getSubmitHandler: OnSubmitSet = (
 ): ParamCallback<string[]> => {
     return (current: string[]): void => {
         const result: SetData = evaluate(current, solution);
-
         setSets(sets.concat(result));
     };
 };
@@ -90,6 +87,20 @@ const getAddColorSetup: AddColorSetup = (
         const subscription: EmitterSubscription = emitter.addListener(
             Events.ADD_COLOR,
             onAddColor
+        );
+
+        return () => subscription.remove();
+    };
+};
+
+const getUndoColorSetup: UndoColorSetup = (
+    emitter: NativeEventEmitter,
+    onUndoColor: EventCallback
+): EventCallback => {
+    return () => {
+        const subscription: EmitterSubscription = emitter.addListener(
+            Events.UNDO_COLOR,
+            onUndoColor
         );
 
         return () => subscription.remove();
@@ -144,9 +155,19 @@ const SetList: PropComponent<SetListProps> = (
         currentLevel.colorsLength,
         submitSetHandler
     );
+    const undoColorHandler: EventCallback = () => {
+        if (colors.length > 0) {
+            setColors(colors.slice(0, -1));
+        }
+    };
+
     const addColorSetup: EventCallback = getAddColorSetup(
         emitter,
         addColorHandler
+    );
+    const undoColorSetup: EventCallback = getUndoColorSetup(
+        emitter,
+        undoColorHandler
     );
 
     const foundSetup: EventCallback = getFoundSetup(
@@ -162,23 +183,52 @@ const SetList: PropComponent<SetListProps> = (
     const currentSet: SetData = { colors, correct: 0, offset: 0 };
 
     useEffect(addColorSetup, [colors]);
+    useEffect(undoColorSetup, [colors]);
     useEffect(foundSetup, [sets]);
     useEffect(resetSetup, []);
-
-    console.log('Solution', solution);
 
     return (
         <View style={styles.container}>
             <ScrollView
-                contentContainerStyle={styles.scroll}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
                 ref={viewRef}
                 onContentSizeChange={getSizeChangeHandler(viewRef)}
             >
-                {sets.map(getSetElement)}
+                {/* Empty state hint */}
+                {sets.length === 0 && (
+                    <View style={styles.welcomeBanner}>
+                        <FontAwesome
+                            name="lightbulb-o"
+                            size={16}
+                            color="#38BDF8"
+                        />
+                        <Text style={styles.welcomeText}>
+                            Guess the secret {currentLevel.colorsLength}-color
+                            code!
+                        </Text>
+                    </View>
+                )}
+
+                {/* Previous attempts */}
+                {sets.map((set: SetData, index: number) => (
+                    <ColorSet
+                        set={set}
+                        key={index}
+                        attemptIndex={index}
+                        totalSlots={currentLevel.colorsLength}
+                    />
+                ))}
 
                 <PlaceholderSet colorLength={currentLevel.colorsLength} />
 
-                <ColorSet set={currentSet} hideLabels={true} />
+                {/* Active guess row */}
+                <ColorSet
+                    set={currentSet}
+                    hideLabels={true}
+                    attemptIndex={sets.length}
+                    totalSlots={currentLevel.colorsLength}
+                />
             </ScrollView>
         </View>
     );
@@ -186,13 +236,37 @@ const SetList: PropComponent<SetListProps> = (
 
 const styles = StyleSheet.create({
     container: {
-        alignItems: 'center',
-        backgroundColor: '#1A1A1A',
-        flex: 1
+        flex: 1,
+        width: '100%',
+        backgroundColor: '#0B0F19'
     },
-    scroll: {
-        alignItems: 'flex-start',
-        paddingBottom: 20
+    scrollView: {
+        flex: 1,
+        width: '100%'
+    },
+    scrollContent: {
+        paddingVertical: 12,
+        paddingHorizontal: 4,
+        alignItems: 'stretch'
+    },
+    welcomeBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(56, 189, 248, 0.08)',
+        borderColor: 'rgba(56, 189, 248, 0.2)',
+        borderWidth: 1,
+        borderRadius: 12,
+        marginHorizontal: 16,
+        marginVertical: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        gap: 8
+    },
+    welcomeText: {
+        color: '#94A3B8',
+        fontSize: 13,
+        fontWeight: '500'
     }
 });
 

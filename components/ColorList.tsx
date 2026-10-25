@@ -1,48 +1,47 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { View } from '@/components/Themed';
+import { StyleSheet, View } from 'react-native';
 import ColorButton from '@/components/ColorButton';
 import { ParamCallback } from '@/constants/Events';
 import { PropComponent, Props } from '@/components/PropComponent';
 
-type Renderer = (hexCode: string, index: number) => React.JSX.Element;
-type Mapper = (onPress?: ParamCallback<string>, disabled?: boolean) => Renderer;
-
 interface ColorListProps extends Props {
     colors: string[];
     onPress?: ParamCallback<string>;
+    size?: number;
 }
-
-const getColorElement: Mapper = (
-    onPress?: ParamCallback<string>,
-    disabled?: boolean
-): Renderer => {
-    return (hexCode: string, index: number) => (
-        <ColorButton
-            color={hexCode}
-            key={index}
-            disabled={disabled}
-            onPress={(): void => (onPress ? onPress(hexCode) : undefined)}
-        />
-    );
-};
 
 const ColorList: PropComponent<ColorListProps> = (
     props: ColorListProps
 ): React.JSX.Element => {
-    const { colors, disabled, onPress } = props;
+    const { colors, disabled, onPress, size } = props;
+
+    if (!colors || !Array.isArray(colors)) {
+        return <View style={styles.container} />;
+    }
 
     return (
         <View style={styles.container}>
-            {colors.map(getColorElement(onPress, disabled))}
+            {colors.map((hexCode: string, index: number) => (
+                <ColorButton
+                    color={hexCode}
+                    key={index}
+                    size={size}
+                    disabled={disabled}
+                    onPress={(): void =>
+                        onPress ? onPress(hexCode) : undefined
+                    }
+                />
+            ))}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        alignItems: 'center',
         backgroundColor: 'transparent',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        justifyContent: 'center'
     }
 });
 
