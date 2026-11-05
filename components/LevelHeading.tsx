@@ -11,7 +11,7 @@ interface LevelHeadingProps {
 
 const LevelHeading: PropComponent<LevelHeadingProps> = (
     props: LevelHeadingProps
-) => {
+): React.JSX.Element => {
     const { level, colorsLength } = props;
     const levelIndex = Math.max(0, level - 1);
     const tierInfo = getTierInfo(levelIndex);

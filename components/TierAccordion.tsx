@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 import { GameTier } from '@/constants/GameLevels';
 
 interface TierAccordionProps {
