@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { NativeEventEmitter, StatusBar, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 
 import SetList from '@/components/SetList';
 import WinModal from '@/components/WinModal';
@@ -17,6 +18,11 @@ import {
     OnNextLevel,
     WinSetup
 } from '@/constants/Events';
+import {
+    getSelectedLevel,
+    setSelectedLevel,
+    setLastPassedLevel
+} from '@/constants/storage';
 
 const getCloseHandler: OnClose = (
     emitter: NativeEventEmitter,
@@ -43,11 +49,12 @@ const getNextLevelHandler: OnNextLevel = (
     closeHandler: ParamCallback<number>
 ): EventCallback => {
     return (): void => {
-        const currentLevel: number =
+        const nextLevel: number =
             levelIndex < GameLevels.length - 1 ? levelIndex + 1 : FIRST_LEVEL;
 
-        setLevel(currentLevel);
-        closeHandler(currentLevel);
+        setSelectedLevel(nextLevel);
+        setLevel(nextLevel);
+        closeHandler(nextLevel);
     };
 };
 
@@ -71,10 +78,30 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
     );
 
     const [showModal, setShowModal] = useState<boolean>(false);
-    const [level, setLevel] = useState<number>(FIRST_LEVEL);
-    const currentLevel: GameLevel = GameLevels[level];
+    const [level, setLevel] = useState<number>(() =>
+        getSelectedLevel(GameLevels.length)
+    );
+    const currentLevel: GameLevel = GameLevels[level] ?? GameLevels[0];
     const [solution, setSolution] = useState<string[]>(() =>
         getRandomColors(currentLevel.colorsLength, currentLevel.availableColors)
+    );
+
+    const currentLevelRef = useRef<number>(level);
+    currentLevelRef.current = level;
+
+    // Sync level when navigating into PlayScreen (e.g. user selected a replay level in Levels tab)
+    useFocusEffect(
+        useCallback(() => {
+            const active = getSelectedLevel(GameLevels.length);
+            if (active !== currentLevelRef.current) {
+                setLevel(active);
+                const lvlObj = GameLevels[active] ?? GameLevels[0];
+                setSolution(
+                    getRandomColors(lvlObj.colorsLength, lvlObj.availableColors)
+                );
+                eventEmitter.emit(Events.RESET_SETS);
+            }
+        }, [eventEmitter])
     );
 
     const closeHandler: ParamCallback<number> = getCloseHandler(
@@ -96,6 +123,13 @@ const PlayScreen: PropComponent<any> = (): React.JSX.Element => {
     );
 
     useEffect(winEffect, [showModal]);
+
+    // When win modal becomes visible, save the completed level in localStorage
+    useEffect(() => {
+        if (showModal) {
+            setLastPassedLevel(level);
+        }
+    }, [showModal, level]);
 
     return (
         <SafeAreaView style={styles.safeArea}>

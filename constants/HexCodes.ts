@@ -1,12 +1,12 @@
 export enum HexCodes {
     RED = '#EF4444',
-    GREEN = '#50B941',
+    GREEN = '#10B981',
     BLUE = '#3B82F6',
-    YELLOW = '#C59E0B',
+    YELLOW = '#F59E0B',
     BEIGE = '#F97316',
     TEAL = '#14B8A6',
     PURPLE = '#8B5CF6',
-    BROWN = '#944309',
+    BROWN = '#B45309',
     WHITE = '#E2E8F0',
     BLACK = '#334155'
 }

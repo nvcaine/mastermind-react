@@ -1,8 +1,12 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { PropComponent } from '@/components/PropComponent';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { GameTiers, GameTier, GameLevel } from '@/constants/GameLevels';
+import { HexCodes } from '@/constants/HexCodes';
+import TierAccordion from '@/components/TierAccordion';
+
+const allColors = Object.values(HexCodes);
 
 const SettingsScreen: PropComponent<any> = (): React.JSX.Element => (
     <SafeAreaView style={styles.safeArea}>
@@ -12,9 +16,9 @@ const SettingsScreen: PropComponent<any> = (): React.JSX.Element => (
         >
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.title}>Settings & Guide</Text>
+                <Text style={styles.title}>Game Guide & Info</Text>
                 <Text style={styles.subtitle}>
-                    Game rules, clue mechanics, and information
+                    Game rules, clue mechanics, and tier structure
                 </Text>
             </View>
 
@@ -63,6 +67,77 @@ const SettingsScreen: PropComponent<any> = (): React.JSX.Element => (
                 </View>
             </View>
 
+            {/* Tiers & Level Restructure Accordion Section */}
+            <View style={styles.sectionHeader}>
+                <FontAwesome name="sitemap" size={16} color="#F59E0B" />
+                <Text style={styles.sectionTitle}>
+                    Tiers & Level Progression
+                </Text>
+            </View>
+
+            <View style={styles.accordionGroup}>
+                {GameTiers.map((tier: GameTier, tIndex: number) => (
+                    <TierAccordion
+                        key={tier.tierNumber}
+                        tier={tier}
+                        initiallyExpanded={tIndex === 0}
+                        badgeText={`${tier.colorsLength} Pegs`}
+                    >
+                        <View style={styles.accordionLevelsList}>
+                            {tier.levels.map(
+                                (lvl: GameLevel, lIndex: number) => {
+                                    const overallLvl = tIndex * 5 + lIndex + 1;
+                                    const swatches = allColors.slice(
+                                        0,
+                                        lvl.availableColors
+                                    );
+
+                                    return (
+                                        <View
+                                            key={lIndex}
+                                            style={styles.tierLevelRow}
+                                        >
+                                            <View style={styles.tierLevelLeft}>
+                                                <Text
+                                                    style={styles.tierLevelNum}
+                                                >
+                                                    Level {overallLvl}
+                                                </Text>
+                                                <Text
+                                                    style={styles.tierLevelSub}
+                                                >
+                                                    {lvl.colorsLength} Pegs •{' '}
+                                                    {lvl.availableColors} Colors
+                                                </Text>
+                                            </View>
+                                            <View style={styles.swatchMiniRow}>
+                                                {swatches.map(
+                                                    (
+                                                        hex: string,
+                                                        sIdx: number
+                                                    ) => (
+                                                        <View
+                                                            key={sIdx}
+                                                            style={[
+                                                                styles.swatchMiniDot,
+                                                                {
+                                                                    backgroundColor:
+                                                                        hex
+                                                                }
+                                                            ]}
+                                                        />
+                                                    )
+                                                )}
+                                            </View>
+                                        </View>
+                                    );
+                                }
+                            )}
+                        </View>
+                    </TierAccordion>
+                ))}
+            </View>
+
             {/* Tips & Strategy */}
             <View style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -82,6 +157,10 @@ const SettingsScreen: PropComponent<any> = (): React.JSX.Element => (
                         • Track color positions across turns to isolate the
                         exact pegs.
                     </Text>
+                    <Text style={styles.tipItem}>
+                        • Replay previously completed levels from the Levels tab
+                        anytime to hone your speed and strategy.
+                    </Text>
                 </View>
             </View>
 
@@ -93,7 +172,11 @@ const SettingsScreen: PropComponent<any> = (): React.JSX.Element => (
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Game Version</Text>
-                    <Text style={styles.infoValue}>1.0.0 Modern Edition</Text>
+                    <Text style={styles.infoValue}>2.0.0 Tier Edition</Text>
+                </View>
+                <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Tiers & Levels</Text>
+                    <Text style={styles.infoValue}>4 Tiers • 20 Levels</Text>
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Engine</Text>
@@ -134,6 +217,59 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#94A3B8',
         lineHeight: 20
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 6,
+        marginBottom: 12,
+        paddingHorizontal: 4
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#F8FAFC',
+        letterSpacing: 0.3
+    },
+    accordionGroup: {
+        marginBottom: 16
+    },
+    accordionLevelsList: {
+        gap: 8,
+        paddingTop: 8
+    },
+    tierLevelRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'rgba(15, 23, 42, 0.6)',
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 10
+    },
+    tierLevelLeft: {
+        gap: 2
+    },
+    tierLevelNum: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#F8FAFC'
+    },
+    tierLevelSub: {
+        fontSize: 11,
+        color: '#94A3B8'
+    },
+    swatchMiniRow: {
+        flexDirection: 'row',
+        gap: 4
+    },
+    swatchMiniDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)'
     },
     card: {
         backgroundColor: '#1E293B',

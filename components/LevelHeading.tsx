@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { PropComponent } from '@/components/PropComponent';
+import { getTierInfo } from '@/constants/GameLevels';
 
 interface LevelHeadingProps {
     level: number;
@@ -12,6 +13,8 @@ const LevelHeading: PropComponent<LevelHeadingProps> = (
     props: LevelHeadingProps
 ) => {
     const { level, colorsLength } = props;
+    const levelIndex = Math.max(0, level - 1);
+    const tierInfo = getTierInfo(levelIndex);
 
     return (
         <View style={styles.container}>
@@ -19,10 +22,18 @@ const LevelHeading: PropComponent<LevelHeadingProps> = (
             <View style={styles.topRow}>
                 <View style={styles.levelBadge}>
                     <FontAwesome name="trophy" size={13} color="#F59E0B" />
-                    <Text style={styles.levelTitle}>LEVEL {level}</Text>
+                    <Text style={styles.levelTitle}>
+                        TIER {tierInfo.tierNumber} • LEVEL{' '}
+                        {tierInfo.levelInTier}
+                    </Text>
                 </View>
 
                 <View style={styles.chipsContainer}>
+                    <View style={styles.chipTier}>
+                        <Text style={styles.chipTierText}>
+                            Overall #{level}
+                        </Text>
+                    </View>
                     <View style={styles.chip}>
                         <Text style={styles.chipText}>{colorsLength} Pegs</Text>
                     </View>
@@ -83,7 +94,21 @@ const styles = StyleSheet.create({
     },
     chipsContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
         gap: 8
+    },
+    chipTier: {
+        backgroundColor: 'rgba(56, 189, 248, 0.12)',
+        borderColor: 'rgba(56, 189, 248, 0.25)',
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingHorizontal: 9,
+        paddingVertical: 5
+    },
+    chipTierText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#38BDF8'
     },
     chip: {
         backgroundColor: 'rgba(255, 255, 255, 0.07)',
