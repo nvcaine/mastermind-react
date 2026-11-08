@@ -26,13 +26,11 @@ const ColorSet: PropComponent<EvaluatedSetProps> = (
         );
     }
 
-    const isCurrentActive = Boolean(hideLabels);
-
     return (
         <View
             style={[
                 styles.card,
-                isCurrentActive ? styles.activeCard : styles.completedCard
+                hideLabels ? styles.activeCard : styles.completedCard
             ]}
         >
             {/* Left: Attempt Number */}
@@ -55,7 +53,7 @@ const ColorSet: PropComponent<EvaluatedSetProps> = (
 
             {/* Right: Clue badges or Active Indicator */}
             <View style={styles.cluesContainer}>
-                {isCurrentActive ? (
+                {hideLabels ? (
                     <View style={styles.activePill}>
                         <View style={styles.activeDot} />
                         <Text style={styles.activeLabel}>Pick</Text>
@@ -114,7 +112,7 @@ const styles = StyleSheet.create({
         elevation: 2
     },
     activeCard: {
-        backgroundColor: 'rgba(30, 41, 59, 0.85)',
+        backgroundColor: '#1E293B',
         borderColor: 'rgba(59, 130, 246, 0.4)',
         borderWidth: 1.5,
         shadowColor: '#3B82F6',
