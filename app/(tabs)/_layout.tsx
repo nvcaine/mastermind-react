@@ -1,66 +1,78 @@
 import React from 'react';
+import { Tabs } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { ColorSchemeName, Pressable } from 'react-native';
-
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
     name: React.ComponentProps<typeof FontAwesome>['name'];
-    color: string;
+    color: React.ComponentProps<typeof FontAwesome>['color'];
 }): React.JSX.Element {
-    return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+    return <FontAwesome size={22} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout(): React.JSX.Element {
-    const colorScheme: ColorSchemeName = useColorScheme();
+    const rawColorScheme = useColorScheme();
+    const themeKey = rawColorScheme === 'dark' ? 'dark' : 'light';
+    const theme = Colors[themeKey];
 
     return (
         <Tabs
+            backBehavior="firstRoute"
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-                // Disable the static render of the header on web
-                // to prevent a hydration error in React Navigation v6.
-                headerShown: useClientOnlyValue(false, true)
+                tabBarActiveTintColor: theme.tabIconSelected,
+                tabBarInactiveTintColor: theme.tabIconDefault,
+                tabBarStyle: {
+                    backgroundColor: theme.dockBackground,
+                    borderTopColor: theme.dockBorder,
+                    borderTopWidth: 1,
+                    height: 58,
+                    paddingBottom: 6,
+                    paddingTop: 6
+                },
+                tabBarLabelStyle: {
+                    fontSize: 11,
+                    fontWeight: '600'
+                },
+                headerStyle: {
+                    backgroundColor: theme.background,
+                    borderBottomColor: theme.cardBorder,
+                    borderBottomWidth: 1
+                },
+                headerTintColor: theme.text,
+                headerTitleStyle: {
+                    fontWeight: '700',
+                    fontSize: 17
+                }
             }}
         >
             <Tabs.Screen
                 name="index"
                 options={{
                     title: 'Play',
+                    headerShown: false,
                     tabBarIcon: ({ color }) => (
-                        <TabBarIcon name="play" color={color} />
-                    ),
-                    headerRight: () => (
-                        <Link href="/modal" asChild>
-                            <Pressable>
-                                {({ pressed }) => (
-                                    <FontAwesome
-                                        name="info-circle"
-                                        size={25}
-                                        color={
-                                            Colors[colorScheme ?? 'light'].text
-                                        }
-                                        style={{
-                                            marginRight: 15,
-                                            opacity: pressed ? 0.5 : 1
-                                        }}
-                                    />
-                                )}
-                            </Pressable>
-                        </Link>
+                        <TabBarIcon name="gamepad" color={color} />
                     )
                 }}
             />
             <Tabs.Screen
-                name="two"
+                name="levels"
                 options={{
-                    title: 'Settings',
+                    title: 'Levels',
+                    headerShown: false,
                     tabBarIcon: ({ color }) => (
-                        <TabBarIcon name="cog" color={color} />
+                        <TabBarIcon name="trophy" color={color} />
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="settings"
+                options={{
+                    title: 'Guide',
+                    headerShown: false,
+                    tabBarIcon: ({ color }) => (
+                        <TabBarIcon name="book" color={color} />
                     )
                 }}
             />
