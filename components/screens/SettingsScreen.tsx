@@ -1,12 +1,8 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { PropComponent } from '@/components/PropComponent';
-import { GameTiers, GameTier, GameLevel } from '@/constants/GameLevels';
-import { HexCodes } from '@/constants/HexCodes';
-import TierAccordion from '@/components/TierAccordion';
-
-const allColors = Object.values(HexCodes);
 
 const SettingsScreen: PropComponent<any> = (): React.JSX.Element => (
     <SafeAreaView style={styles.safeArea}>
@@ -65,77 +61,6 @@ const SettingsScreen: PropComponent<any> = (): React.JSX.Element => (
                         </Text>
                     </View>
                 </View>
-            </View>
-
-            {/* Tiers & Level Restructure Accordion Section */}
-            <View style={styles.sectionHeader}>
-                <FontAwesome name="sitemap" size={16} color="#F59E0B" />
-                <Text style={styles.sectionTitle}>
-                    Tiers & Level Progression
-                </Text>
-            </View>
-
-            <View style={styles.accordionGroup}>
-                {GameTiers.map((tier: GameTier, tIndex: number) => (
-                    <TierAccordion
-                        key={tier.tierNumber}
-                        tier={tier}
-                        initiallyExpanded={tIndex === 0}
-                        badgeText={`${tier.colorsLength} Pegs`}
-                    >
-                        <View style={styles.accordionLevelsList}>
-                            {tier.levels.map(
-                                (lvl: GameLevel, lIndex: number) => {
-                                    const overallLvl = tIndex * 5 + lIndex + 1;
-                                    const swatches = allColors.slice(
-                                        0,
-                                        lvl.availableColors
-                                    );
-
-                                    return (
-                                        <View
-                                            key={lIndex}
-                                            style={styles.tierLevelRow}
-                                        >
-                                            <View style={styles.tierLevelLeft}>
-                                                <Text
-                                                    style={styles.tierLevelNum}
-                                                >
-                                                    Level {overallLvl}
-                                                </Text>
-                                                <Text
-                                                    style={styles.tierLevelSub}
-                                                >
-                                                    {lvl.colorsLength} Pegs •{' '}
-                                                    {lvl.availableColors} Colors
-                                                </Text>
-                                            </View>
-                                            <View style={styles.swatchMiniRow}>
-                                                {swatches.map(
-                                                    (
-                                                        hex: string,
-                                                        sIdx: number
-                                                    ) => (
-                                                        <View
-                                                            key={sIdx}
-                                                            style={[
-                                                                styles.swatchMiniDot,
-                                                                {
-                                                                    backgroundColor:
-                                                                        hex
-                                                                }
-                                                            ]}
-                                                        />
-                                                    )
-                                                )}
-                                            </View>
-                                        </View>
-                                    );
-                                }
-                            )}
-                        </View>
-                    </TierAccordion>
-                ))}
             </View>
 
             {/* Tips & Strategy */}
