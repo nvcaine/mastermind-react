@@ -10,7 +10,7 @@ export interface PlaceholderSetProps extends Props {
 
 const PlaceholderSet: PropComponent<PlaceholderSetProps> = (
     props: PlaceholderSetProps
-) => {
+): JSX.Element => {
     const { colorLength } = props;
     const defaultSet: SetData = {
         colors: Array(colorLength).fill('transparent'),

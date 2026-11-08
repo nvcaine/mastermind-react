@@ -6,7 +6,7 @@ import {
     View,
     Text
 } from 'react-native';
-import React, { RefObject, useEffect, useRef, useState } from 'react';
+import { JSX, RefObject, useEffect, useRef, useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { GameLevel } from '@/constants/GameLevels';
 import { evaluate, SetData } from '@/constants/HexCodes';
