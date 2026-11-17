@@ -46,4 +46,4 @@ Docs: https://docs.expo.dev/eas/index.md
 - Use `gh api repos/nvcaine/mastermind-react/issues/<number> --jq .body` to read issue details
 - Each commit must reflect an item in the description list
 - Each commit must maintain consistency, the build should not fail
-- Use `gh pr create` to submit your work for review.
+- Use `gh pr create` to submit your work for review. The current branch should be merged into `develop`.
