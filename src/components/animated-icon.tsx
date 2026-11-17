@@ -1,5 +1,5 @@
 import * as SplashScreen from 'expo-splash-screen';
-import { JSX, useState } from 'react';
+import { JSX, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
     Easing,
@@ -13,6 +13,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { HexCodes } from '@/constants/HexCodes';
 
 const DURATION = 600;
+const MIN_VISIBLE_MS = 2000;
 const PEG_SIZE = 120;
 const RING_SIZE = PEG_SIZE * 1.7;
 const SEGMENT_COUNT = 10;
@@ -65,6 +66,7 @@ function SplashPeg(): JSX.Element {
 export function AnimatedSplashOverlay() {
     const [animate, setAnimate] = useState(false);
     const [visible, setVisible] = useState(true);
+    const mountTime = useRef(Date.now());
 
     if (!visible) return null;
 
@@ -105,7 +107,9 @@ export function AnimatedSplashOverlay() {
         <View
             onLayout={() => {
                 SplashScreen.hideAsync().finally(() => {
-                    setAnimate(true);
+                    const elapsed = Date.now() - mountTime.current;
+                    const remaining = Math.max(0, MIN_VISIBLE_MS - elapsed);
+                    setTimeout(() => setAnimate(true), remaining);
                 });
             }}
             style={styles.splashOverlay}
