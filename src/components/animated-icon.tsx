@@ -1,17 +1,63 @@
 import * as SplashScreen from 'expo-splash-screen';
 import { JSX, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { Easing, Keyframe } from 'react-native-reanimated';
+import Animated, {
+    Easing,
+    Keyframe,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withTiming
+} from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
+import { HexCodes } from '@/constants/HexCodes';
 
 const DURATION = 600;
 const PEG_SIZE = 120;
+const RING_SIZE = PEG_SIZE * 1.7;
+const SEGMENT_COUNT = 10;
+const GAME_COLORS = Object.values(HexCodes);
+
+function GlowRing(): JSX.Element {
+    const rotation = useSharedValue(0);
+    rotation.value = withRepeat(
+        withTiming(360, { duration: 4000, easing: Easing.linear }),
+        -1
+    );
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${rotation.value}deg` }]
+    }));
+
+    return (
+        <Animated.View style={[styles.glowRing, animatedStyle]}>
+            {GAME_COLORS.slice(0, SEGMENT_COUNT).map((color, i) => {
+                const angle = (i * 360) / SEGMENT_COUNT;
+                return (
+                    <View
+                        key={color}
+                        style={[
+                            styles.segment,
+                            {
+                                backgroundColor: color,
+                                transform: [{ rotate: `${angle}deg` }]
+                            }
+                        ]}
+                    />
+                );
+            })}
+        </Animated.View>
+    );
+}
 
 function SplashPeg(): JSX.Element {
     return (
-        <View style={styles.peg}>
-            <View style={styles.glossHighlight} />
-            <View style={styles.bottomSheen} />
+        <View style={styles.pegWrapper}>
+            <GlowRing />
+            <View style={styles.peg}>
+                <View style={styles.glossHighlight} />
+                <View style={styles.bottomSheen} />
+            </View>
         </View>
     );
 }
@@ -76,6 +122,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000
+    },
+    pegWrapper: {
+        width: RING_SIZE,
+        height: RING_SIZE,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    glowRing: {
+        position: 'absolute',
+        width: RING_SIZE,
+        height: RING_SIZE,
+        borderRadius: RING_SIZE / 2,
+        overflow: 'hidden'
+    },
+    segment: {
+        position: 'absolute',
+        width: RING_SIZE / 2,
+        height: RING_SIZE,
+        left: RING_SIZE / 2,
+        top: 0,
+        transformOrigin: `0px ${RING_SIZE / 2}px`
     },
     peg: {
         width: PEG_SIZE,
