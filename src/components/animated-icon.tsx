@@ -1,8 +1,9 @@
 import * as SplashScreen from 'expo-splash-screen';
-import { JSX, useRef, useState } from 'react';
+import { JSX, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
     Easing,
+    interpolateColor,
     Keyframe,
     useAnimatedStyle,
     useSharedValue,
@@ -15,40 +16,40 @@ import { HexCodes } from '@/constants/HexCodes';
 const DURATION = 600;
 const MIN_VISIBLE_MS = 2000;
 const PEG_SIZE = 120;
-const RING_SIZE = PEG_SIZE * 1.7;
-const SEGMENT_COUNT = 10;
+const GLOW_SIZE = PEG_SIZE * 1.5;
 const GAME_COLORS = Object.values(HexCodes);
+// To complete a full smooth loop back to the beginning:
+const COLOR_CYCLE = [...GAME_COLORS, GAME_COLORS[0]];
+const CYCLE_INPUT_RANGE = COLOR_CYCLE.map((_, i) => i);
+const CYCLE_DURATION = 4000;
 
 function GlowRing(): JSX.Element {
-    const rotation = useSharedValue(0);
-    rotation.value = withRepeat(
-        withTiming(360, { duration: 4000, easing: Easing.linear }),
-        -1
-    );
+    const progress = useSharedValue(0);
 
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ rotate: `${rotation.value}deg` }]
-    }));
+    useEffect(() => {
+        progress.value = withRepeat(
+            withTiming(COLOR_CYCLE.length - 1, {
+                duration: CYCLE_DURATION,
+                easing: Easing.linear
+            }),
+            -1
+        );
+    }, [progress]);
 
-    return (
-        <Animated.View style={[styles.glowRing, animatedStyle]}>
-            {GAME_COLORS.slice(0, SEGMENT_COUNT).map((color, i) => {
-                const angle = (i * 360) / SEGMENT_COUNT;
-                return (
-                    <View
-                        key={color}
-                        style={[
-                            styles.segment,
-                            {
-                                backgroundColor: color,
-                                transform: [{ rotate: `${angle}deg` }]
-                            }
-                        ]}
-                    />
-                );
-            })}
-        </Animated.View>
-    );
+    const animatedGlowStyle = useAnimatedStyle(() => {
+        const color = interpolateColor(
+            progress.value,
+            CYCLE_INPUT_RANGE,
+            COLOR_CYCLE
+        );
+
+        return {
+            backgroundColor: color,
+            shadowColor: color
+        };
+    });
+
+    return <Animated.View style={[styles.glowRing, animatedGlowStyle]} />;
 }
 
 function SplashPeg(): JSX.Element {
@@ -128,25 +129,22 @@ const styles = StyleSheet.create({
         zIndex: 1000
     },
     pegWrapper: {
-        width: RING_SIZE,
-        height: RING_SIZE,
+        width: GLOW_SIZE,
+        height: GLOW_SIZE,
         alignItems: 'center',
         justifyContent: 'center'
     },
     glowRing: {
         position: 'absolute',
-        width: RING_SIZE,
-        height: RING_SIZE,
-        borderRadius: RING_SIZE / 2,
-        overflow: 'hidden'
-    },
-    segment: {
-        position: 'absolute',
-        width: RING_SIZE / 2,
-        height: RING_SIZE,
-        left: RING_SIZE / 2,
-        top: 0,
-        transformOrigin: `0px ${RING_SIZE / 2}px`
+        width: GLOW_SIZE,
+        height: GLOW_SIZE,
+        borderRadius: GLOW_SIZE / 2,
+        opacity: 0.5,
+        // Blur / glow effect across iOS, Android, and Web
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.9,
+        shadowRadius: 35,
+        elevation: 20
     },
     peg: {
         width: PEG_SIZE,
