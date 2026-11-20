@@ -1,19 +1,25 @@
-import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
-import { JSX, useState } from 'react';
+import { JSX, RefObject, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { Easing, Keyframe } from 'react-native-reanimated';
+import Animated, {
+    Easing,
+    Keyframe,
+    ReanimatedKeyframe
+} from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
+import SplashPeg from '@/components/splash-peg';
 
-const DURATION = 600;
+const DURATION: number = 600;
+const MIN_VISIBLE_MS: number = 2000;
 
-export function AnimatedSplashOverlay() {
+export function AnimatedSplashOverlay(): JSX.Element | null {
     const [animate, setAnimate] = useState(false);
     const [visible, setVisible] = useState(true);
+    const mountTime: RefObject<number> = useRef(Date.now());
 
     if (!visible) return null;
 
-    const splashKeyframe = new Keyframe({
+    const splashKeyframe: ReanimatedKeyframe = new Keyframe({
         0: {
             transform: [{ scale: 1 }],
             opacity: 1
@@ -32,18 +38,11 @@ export function AnimatedSplashOverlay() {
         }
     });
 
-    const image: JSX.Element = (
-        <Image
-            style={styles.image}
-            source={require('@/assets/images/expo-logo.png')}
-        />
-    );
-
     return animate ? (
         <Animated.View
             entering={splashKeyframe
                 .duration(DURATION)
-                .withCallback((finished) => {
+                .withCallback((finished: boolean): void => {
                     'worklet';
                     if (finished) {
                         scheduleOnRN(setVisible, false);
@@ -51,30 +50,31 @@ export function AnimatedSplashOverlay() {
                 })}
             style={styles.splashOverlay}
         >
-            {image}
+            <SplashPeg />
         </Animated.View>
     ) : (
         <View
-            onLayout={() => {
+            onLayout={(): void => {
                 SplashScreen.hideAsync().finally(() => {
-                    setAnimate(true);
+                    const elapsed: number = Date.now() - mountTime.current;
+                    const remaining: number = Math.max(
+                        0,
+                        MIN_VISIBLE_MS - elapsed
+                    );
+                    setTimeout(() => setAnimate(true), remaining);
                 });
             }}
             style={styles.splashOverlay}
         >
-            {image}
+            <SplashPeg />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    image: {
-        width: 76,
-        height: 71
-    },
     splashOverlay: {
         ...StyleSheet.absoluteFill,
-        backgroundColor: '#208AEF',
+        backgroundColor: '#0B0F19',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000
