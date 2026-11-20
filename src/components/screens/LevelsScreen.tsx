@@ -127,19 +127,19 @@ const LevelsScreen: PropComponent<any> = (): JSX.Element => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            {/* Header Title */}
+            <View style={styles.header}>
+                <Text style={styles.title}>Game Tiers & Levels</Text>
+                <Text style={styles.subtitle}>
+                    Conquer 4 tiers of escalating challenge, expanding peg
+                    lengths, and richer color pools
+                </Text>
+            </View>
+
             <ScrollView
                 style={styles.container}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Header Title */}
-                <View style={styles.header}>
-                    <Text style={styles.title}>Game Tiers & Levels</Text>
-                    <Text style={styles.subtitle}>
-                        Conquer 4 tiers of escalating challenge, expanding peg
-                        lengths, and richer color pools
-                    </Text>
-                </View>
-
                 <View style={styles.tiersContainer}>
                     {GameTiers.map(renderer(lastPassed, handleSelectLevel))}
                 </View>
@@ -162,8 +162,7 @@ const styles = StyleSheet.create({
         paddingBottom: 32
     },
     header: {
-        marginBottom: 20,
-        paddingHorizontal: 4
+        padding: 16
     },
     title: {
         fontSize: 24,

@@ -29,7 +29,7 @@ export default function AppTabs(): JSX.Element {
                 />
             </NativeTabs.Trigger>
 
-            <NativeTabs.Trigger name="settings">
+            <NativeTabs.Trigger name="guide">
                 <NativeTabs.Trigger.Label>Guide</NativeTabs.Trigger.Label>
                 <NativeTabs.Trigger.Icon
                     src={require('@/assets/images/tabIcons/magnifier.png')}
