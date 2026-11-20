@@ -42,8 +42,10 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## Git & GitHub Workflow
 - Never commit or push directly to `main` or `develop`.
-- When starting work on a specific issue, checkout the attached branch and use it for work
-- Use `gh api repos/nvcaine/mastermind-react/issues/<number> --jq .body` to read issue details
+- When starting work on a specific issue, checkout the attached branch and use it for work.
+- Use `gh api repos/nvcaine/mastermind-react/issues/<number> --jq .body` to read issue details.
+- Before making any changes, make a plan for implementing the issue details.
+- When the plan is approved, save a copy in a file in the `plans` folder; add the file and commit it.
 - Each commit must reflect an item in the description list
 - Each commit must maintain consistency, the build should not fail
-- Use `gh pr create` to submit your work for review. The current branch should be merged into `develop`.
+- Use `gh pr create` to submit the changes for review. The current branch should be merged into `develop`.
