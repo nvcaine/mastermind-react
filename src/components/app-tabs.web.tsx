@@ -1,4 +1,4 @@
-import { JSX } from 'react';
+import { JSX, ReactNode } from 'react';
 import {
     Tabs,
     TabList,
@@ -7,7 +7,14 @@ import {
     TabTriggerSlotProps,
     TabListProps
 } from 'expo-router/ui';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import {
+    Image,
+    ImageSourcePropType,
+    Pressable,
+    useColorScheme,
+    View,
+    StyleSheet
+} from 'react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -20,14 +27,26 @@ export default function AppTabs(): JSX.Element {
             <TabSlot style={styles.tabSlot} />
             <TabList asChild>
                 <CustomTabList>
-                    <TabTrigger name="home" href="/" asChild>
-                        <TabButton>Home</TabButton>
+                    <TabTrigger name="index" href="/" asChild>
+                        <TabButton
+                            icon={require('@/assets/images/tabIcons/gamepad.png')}
+                        >
+                            Play
+                        </TabButton>
                     </TabTrigger>
-                    <TabTrigger name="explore" href="/levels" asChild>
-                        <TabButton>Levels</TabButton>
+                    <TabTrigger name="levels" href="/levels" asChild>
+                        <TabButton
+                            icon={require('@/assets/images/tabIcons/star.png')}
+                        >
+                            Levels
+                        </TabButton>
                     </TabTrigger>
                     <TabTrigger name="settings" href="/settings" asChild>
-                        <TabButton>Settings</TabButton>
+                        <TabButton
+                            icon={require('@/assets/images/tabIcons/magnifier.png')}
+                        >
+                            Guide
+                        </TabButton>
                     </TabTrigger>
                 </CustomTabList>
             </TabList>
@@ -35,11 +54,21 @@ export default function AppTabs(): JSX.Element {
     );
 }
 
+interface TabButtonProps extends TabTriggerSlotProps {
+    children?: ReactNode;
+    icon?: ImageSourcePropType;
+}
+
 export function TabButton({
     children,
     isFocused,
+    icon,
     ...props
-}: TabTriggerSlotProps) {
+}: TabButtonProps) {
+    const scheme = useColorScheme();
+    const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+    const tintColor = isFocused ? colors.text : colors.textSecondary;
+
     return (
         <Pressable
             {...props}
@@ -49,6 +78,13 @@ export function TabButton({
                 type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
                 style={styles.tabButtonView}
             >
+                {icon && (
+                    <Image
+                        source={icon}
+                        style={[styles.tabIcon, { tintColor }]}
+                        resizeMode="contain"
+                    />
+                )}
                 <ThemedText
                     type="small"
                     themeColor={isFocused ? 'text' : 'textSecondary'}
@@ -108,9 +144,16 @@ const styles = StyleSheet.create({
         opacity: 0.7
     },
     tabButtonView: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.two,
         paddingVertical: Spacing.one,
         paddingHorizontal: Spacing.three,
         borderRadius: Spacing.three
+    },
+    tabIcon: {
+        width: 18,
+        height: 18
     },
     externalPressable: {
         flexDirection: 'row',
