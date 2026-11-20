@@ -24,7 +24,7 @@ export default function AppTabs(): JSX.Element {
             <NativeTabs.Trigger name="levels">
                 <NativeTabs.Trigger.Label>Levels</NativeTabs.Trigger.Label>
                 <NativeTabs.Trigger.Icon
-                    src={require('@/assets/images/tabIcons/explore.png')}
+                    src={require('@/assets/images/tabIcons/star.png')}
                     renderingMode="template"
                 />
             </NativeTabs.Trigger>
