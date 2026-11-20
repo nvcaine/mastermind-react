@@ -16,7 +16,7 @@ export default function AppTabs(): JSX.Element {
             <NativeTabs.Trigger name="index">
                 <NativeTabs.Trigger.Label>Play</NativeTabs.Trigger.Label>
                 <NativeTabs.Trigger.Icon
-                    src={require('@/assets/images/tabIcons/home.png')}
+                    src={require('@/assets/images/tabIcons/gamepad.png')}
                     renderingMode="template"
                 />
             </NativeTabs.Trigger>
