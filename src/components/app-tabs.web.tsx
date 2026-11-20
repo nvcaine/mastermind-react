@@ -16,8 +16,8 @@ import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 
 export default function AppTabs(): JSX.Element {
     return (
-        <Tabs>
-            <TabSlot style={{ height: '100%' }} />
+        <Tabs style={styles.tabsContainer}>
+            <TabSlot style={styles.tabSlot} />
             <TabList asChild>
                 <CustomTabList>
                     <TabTrigger name="home" href="/" asChild>
@@ -74,6 +74,14 @@ export function CustomTabList(props: TabListProps) {
 }
 
 const styles = StyleSheet.create({
+    tabsContainer: {
+        flex: 1,
+        height: '100%'
+    },
+    tabSlot: {
+        flex: 1,
+        paddingBottom: 72
+    },
     tabListContainer: {
         position: 'absolute',
         bottom: 0,
