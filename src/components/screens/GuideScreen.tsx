@@ -4,20 +4,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { PropComponent } from '@/components/PropComponent';
 
-const SettingsScreen: PropComponent<any> = (): JSX.Element => (
+const GuideScreen: PropComponent<any> = (): JSX.Element => (
     <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+            <Text style={styles.title}>Game Guide & Info</Text>
+            <Text style={styles.subtitle}>
+                Game rules, clue mechanics, and tier structure
+            </Text>
+        </View>
+
         <ScrollView
             style={styles.container}
             contentContainerStyle={styles.scrollContent}
         >
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.title}>Game Guide & Info</Text>
-                <Text style={styles.subtitle}>
-                    Game rules, clue mechanics, and tier structure
-                </Text>
-            </View>
-
             {/* How to Play Card */}
             <View style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -128,8 +128,7 @@ const styles = StyleSheet.create({
         paddingBottom: 32
     },
     header: {
-        marginBottom: 20,
-        paddingHorizontal: 4
+        padding: 16
     },
     title: {
         fontSize: 24,
@@ -307,4 +306,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default SettingsScreen;
+export default GuideScreen;

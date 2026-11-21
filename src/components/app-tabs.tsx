@@ -16,7 +16,7 @@ export default function AppTabs(): JSX.Element {
             <NativeTabs.Trigger name="index">
                 <NativeTabs.Trigger.Label>Play</NativeTabs.Trigger.Label>
                 <NativeTabs.Trigger.Icon
-                    src={require('@/assets/images/tabIcons/home.png')}
+                    src={require('@/assets/images/tabIcons/gamepad.png')}
                     renderingMode="template"
                 />
             </NativeTabs.Trigger>
@@ -24,15 +24,15 @@ export default function AppTabs(): JSX.Element {
             <NativeTabs.Trigger name="levels">
                 <NativeTabs.Trigger.Label>Levels</NativeTabs.Trigger.Label>
                 <NativeTabs.Trigger.Icon
-                    src={require('@/assets/images/tabIcons/explore.png')}
+                    src={require('@/assets/images/tabIcons/star.png')}
                     renderingMode="template"
                 />
             </NativeTabs.Trigger>
 
-            <NativeTabs.Trigger name="settings">
+            <NativeTabs.Trigger name="guide">
                 <NativeTabs.Trigger.Label>Guide</NativeTabs.Trigger.Label>
                 <NativeTabs.Trigger.Icon
-                    src={require('@/assets/images/tabIcons/explore.png')}
+                    src={require('@/assets/images/tabIcons/magnifier.png')}
                     renderingMode="template"
                 />
             </NativeTabs.Trigger>
