@@ -29,7 +29,9 @@ export function TabButton({
     return (
         <Pressable
             {...props}
-            style={({ pressed }) => pressed && styles.pressed}
+            style={
+                isFocused ? [styles.pressed, styles.focused] : styles.pressed
+            }
         >
             <ThemedView
                 type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
@@ -42,6 +44,7 @@ export function TabButton({
                         resizeMode="contain"
                     />
                 )}
+
                 <ThemedText
                     type="small"
                     themeColor={isFocused ? 'text' : 'textSecondary'}
@@ -55,14 +58,18 @@ export function TabButton({
 
 const styles = StyleSheet.create({
     pressed: {
-        opacity: 0.7
+        opacity: 0.6,
+        flexGrow: 1,
+        alignItems: 'center'
+    },
+    focused: {
+        opacity: 1
     },
     tabButtonView: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
-        gap: Spacing.two,
-        paddingVertical: Spacing.one,
-        paddingHorizontal: Spacing.three,
+        paddingVertical: Spacing.two,
+        paddingHorizontal: Spacing.four,
         borderRadius: Spacing.three
     },
     tabIcon: {

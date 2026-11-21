@@ -45,6 +45,6 @@ const styles = StyleSheet.create({
     },
     tabSlot: {
         flex: 1,
-        paddingBottom: 72
+        paddingBottom: 70
     }
 });
