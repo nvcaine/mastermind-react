@@ -59,21 +59,36 @@ const ColorMenu: PropComponent<ColorMenuProps> = (
 
                 {/* Color swatches */}
                 <View style={styles.paletteContainer}>
-                    <View style={styles.paletteRow}>
-                        <ColorList
-                            colors={hexCodes.slice(0, 5)}
-                            onPress={onPress}
-                            size={38}
-                        />
-                    </View>
-                    {hexCodes.length > 5 && (
+                    {hexCodes.length <= 5 ? (
                         <View style={styles.paletteRow}>
                             <ColorList
-                                colors={hexCodes.slice(5, 10)}
+                                colors={hexCodes}
                                 onPress={onPress}
                                 size={38}
                             />
                         </View>
+                    ) : (
+                        <>
+                            <View style={styles.paletteRow}>
+                                <ColorList
+                                    colors={hexCodes.slice(
+                                        0,
+                                        Math.round(hexCodes.length / 2)
+                                    )}
+                                    onPress={onPress}
+                                    size={38}
+                                />
+                            </View>
+                            <View style={styles.paletteRow}>
+                                <ColorList
+                                    colors={hexCodes.slice(
+                                        Math.round(hexCodes.length / 2)
+                                    )}
+                                    onPress={onPress}
+                                    size={38}
+                                />
+                            </View>
+                        </>
                     )}
                 </View>
             </View>
