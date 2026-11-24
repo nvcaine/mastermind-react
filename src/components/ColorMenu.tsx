@@ -58,8 +58,23 @@ const ColorMenu: PropComponent<ColorMenuProps> = (
                 </View>
 
                 {/* Color swatches */}
-                <View style={styles.paletteRow}>
-                    <ColorList colors={hexCodes} onPress={onPress} size={38} />
+                <View style={styles.paletteContainer}>
+                    <View style={styles.paletteRow}>
+                        <ColorList
+                            colors={hexCodes.slice(0, 5)}
+                            onPress={onPress}
+                            size={38}
+                        />
+                    </View>
+                    {hexCodes.length > 5 && (
+                        <View style={styles.paletteRow}>
+                            <ColorList
+                                colors={hexCodes.slice(5, 10)}
+                                onPress={onPress}
+                                size={38}
+                            />
+                        </View>
+                    )}
                 </View>
             </View>
         </View>
@@ -115,6 +130,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#CBD5E1',
         fontWeight: '600'
+    },
+    paletteContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8
     },
     paletteRow: {
         alignItems: 'center',
