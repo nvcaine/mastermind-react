@@ -36,6 +36,10 @@ const ColorMenu: PropComponent<ColorMenuProps> = (
         availableColors
     );
     const onPress: ParamCallback<string> = getOnPressHandler(emitter);
+    const isSplit = hexCodes.length > 5;
+    const topRowCount = Math.ceil(hexCodes.length / 2);
+    const topRowColors = isSplit ? hexCodes.slice(0, topRowCount) : hexCodes;
+    const bottomRowColors = isSplit ? hexCodes.slice(topRowCount) : [];
 
     const onUndo = (): void => {
         emitter.emit(Events.UNDO_COLOR);
@@ -59,36 +63,21 @@ const ColorMenu: PropComponent<ColorMenuProps> = (
 
                 {/* Color swatches */}
                 <View style={styles.paletteContainer}>
-                    {hexCodes.length <= 5 ? (
+                    <View style={styles.paletteRow}>
+                        <ColorList
+                            colors={topRowColors}
+                            onPress={onPress}
+                            size={38}
+                        />
+                    </View>
+                    {isSplit && (
                         <View style={styles.paletteRow}>
                             <ColorList
-                                colors={hexCodes}
+                                colors={bottomRowColors}
                                 onPress={onPress}
                                 size={38}
                             />
                         </View>
-                    ) : (
-                        <>
-                            <View style={styles.paletteRow}>
-                                <ColorList
-                                    colors={hexCodes.slice(
-                                        0,
-                                        Math.round(hexCodes.length / 2)
-                                    )}
-                                    onPress={onPress}
-                                    size={38}
-                                />
-                            </View>
-                            <View style={styles.paletteRow}>
-                                <ColorList
-                                    colors={hexCodes.slice(
-                                        Math.round(hexCodes.length / 2)
-                                    )}
-                                    onPress={onPress}
-                                    size={38}
-                                />
-                            </View>
-                        </>
                     )}
                 </View>
             </View>
