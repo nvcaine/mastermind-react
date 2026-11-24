@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     attemptContainer: {
-        width: 32,
+        width: 70,
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -142,8 +142,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4
     },
     cluesContainer: {
-        minWidth: 70,
-        alignItems: 'flex-end',
+        width: 70,
+        alignItems: 'center',
         justifyContent: 'center'
     },
     clueBadgesRow: {
