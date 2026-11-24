@@ -1,6 +1,5 @@
 import { JSX } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { PropComponent } from '@/components/PropComponent';
 
@@ -9,7 +8,6 @@ interface LevelStateProps {
     color: string;
     label: string;
     overallIndex: number;
-    passed: boolean;
 }
 
 const LevelState: PropComponent<LevelStateProps> = (
@@ -36,12 +34,6 @@ const LevelState: PropComponent<LevelStateProps> = (
                 {props.label}
             </Text>
         </View>
-        {props.passed ? (
-            <View style={styles.passedBadge}>
-                <FontAwesome name="check" size={10} color="#10B981" />
-                <Text style={styles.passedText}>Passed</Text>
-            </View>
-        ) : null}
     </View>
 );
 
@@ -65,20 +57,6 @@ const styles = StyleSheet.create({
     diffText: {
         fontSize: 11,
         fontWeight: '700'
-    },
-    passedBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(16, 185, 129, 0.15)',
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 6,
-        gap: 4
-    },
-    passedText: {
-        fontSize: 10,
-        fontWeight: '700',
-        color: '#34D399'
     }
 });
 

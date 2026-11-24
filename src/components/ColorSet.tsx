@@ -12,10 +12,18 @@ interface EvaluatedSetProps extends Props {
     totalSlots?: number;
 }
 
+const getPegSize = (totalSlots?: number): number => {
+    if (!totalSlots || totalSlots <= 3) return 42;
+    if (totalSlots === 4) return 38;
+    if (totalSlots === 5) return 32;
+    return 28;
+};
+
 const ColorSet: PropComponent<EvaluatedSetProps> = (
     props: EvaluatedSetProps
 ): JSX.Element => {
     const { set, hideLabels, attemptIndex, totalSlots } = props;
+    const pegSize = getPegSize(totalSlots);
 
     // Build display colors padded with empty sockets if needed
     let displayColors = set?.colors ?? [];
@@ -48,16 +56,26 @@ const ColorSet: PropComponent<EvaluatedSetProps> = (
 
             {/* Center: Pegs */}
             <View style={styles.pegsContainer}>
-                <ColorList colors={displayColors} disabled={true} size={38} />
+                <ColorList
+                    colors={displayColors}
+                    disabled={true}
+                    size={pegSize}
+                />
             </View>
 
             {/* Right: Clue badges or Active Indicator */}
             <View style={styles.cluesContainer}>
                 {hideLabels ? (
-                    <View style={styles.activePill}>
-                        <View style={styles.activeDot} />
-                        <Text style={styles.activeLabel}>Pick</Text>
-                    </View>
+                    <>
+                        <View style={styles.activePill}>
+                            <View style={styles.activeDot} />
+                            <Text style={styles.activeLabel}>Pick</Text>
+                        </View>
+                        <View style={styles.activePill}>
+                            <View style={styles.activeDot} />
+                            <Text style={styles.activeLabel}>Pick</Text>
+                        </View>
+                    </>
                 ) : (
                     <View style={styles.clueBadgesRow}>
                         {/* Exact match badge */}
@@ -99,7 +117,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 12,
         marginVertical: 4,
-        marginHorizontal: 12,
+        marginHorizontal: 0,
+        width: '100%',
         borderWidth: 1
     },
     completedCard: {
@@ -122,7 +141,7 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     attemptContainer: {
-        width: 32,
+        width: 53,
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -142,12 +161,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4
     },
     cluesContainer: {
-        minWidth: 70,
-        alignItems: 'flex-end',
-        justifyContent: 'center'
+        width: 53,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6
     },
     clueBadgesRow: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         gap: 6
     },
@@ -184,6 +204,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     activePill: {
+        visibility: 'hidden',
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'rgba(59, 130, 246, 0.15)',
