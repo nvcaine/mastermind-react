@@ -99,7 +99,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 12,
         marginVertical: 4,
-        marginHorizontal: 12,
+        marginHorizontal: 0,
+        width: '100%',
         borderWidth: 1
     },
     completedCard: {
