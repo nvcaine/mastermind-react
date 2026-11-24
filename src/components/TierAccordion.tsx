@@ -36,9 +36,6 @@ export const TierAccordion: React.FC<TierAccordionProps> = ({
                     </View>
                     <View>
                         <Text style={styles.tierTitle}>{tier.title}</Text>
-                        <Text style={styles.tierSubtitle}>
-                            {tier.colorsLength} Code Pegs • 5 Challenge Levels
-                        </Text>
                     </View>
                 </View>
 

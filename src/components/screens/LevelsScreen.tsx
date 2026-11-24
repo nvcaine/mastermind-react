@@ -79,7 +79,6 @@ const renderer = (
                                         color={diff.color}
                                         label={diff.label}
                                         overallIndex={overallIndex}
-                                        passed={passed}
                                     />
 
                                     <LevelButton
