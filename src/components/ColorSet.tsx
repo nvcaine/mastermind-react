@@ -66,10 +66,16 @@ const ColorSet: PropComponent<EvaluatedSetProps> = (
             {/* Right: Clue badges or Active Indicator */}
             <View style={styles.cluesContainer}>
                 {hideLabels ? (
-                    <View style={styles.activePill}>
-                        <View style={styles.activeDot} />
-                        <Text style={styles.activeLabel}>Pick</Text>
-                    </View>
+                    <>
+                        <View style={styles.activePill}>
+                            <View style={styles.activeDot} />
+                            <Text style={styles.activeLabel}>Pick</Text>
+                        </View>
+                        <View style={styles.activePill}>
+                            <View style={styles.activeDot} />
+                            <Text style={styles.activeLabel}>Pick</Text>
+                        </View>
+                    </>
                 ) : (
                     <View style={styles.clueBadgesRow}>
                         {/* Exact match badge */}
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     attemptContainer: {
-        width: 70,
+        width: 53,
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -155,12 +161,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4
     },
     cluesContainer: {
-        width: 70,
+        width: 53,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        gap: 6
     },
     clueBadgesRow: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         gap: 6
     },
@@ -197,6 +204,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     activePill: {
+        visibility: 'hidden',
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'rgba(59, 130, 246, 0.15)',
