@@ -12,10 +12,18 @@ interface EvaluatedSetProps extends Props {
     totalSlots?: number;
 }
 
+const getPegSize = (totalSlots?: number): number => {
+    if (!totalSlots || totalSlots <= 3) return 42;
+    if (totalSlots === 4) return 38;
+    if (totalSlots === 5) return 32;
+    return 28;
+};
+
 const ColorSet: PropComponent<EvaluatedSetProps> = (
     props: EvaluatedSetProps
 ): JSX.Element => {
     const { set, hideLabels, attemptIndex, totalSlots } = props;
+    const pegSize = getPegSize(totalSlots);
 
     // Build display colors padded with empty sockets if needed
     let displayColors = set?.colors ?? [];
@@ -48,7 +56,11 @@ const ColorSet: PropComponent<EvaluatedSetProps> = (
 
             {/* Center: Pegs */}
             <View style={styles.pegsContainer}>
-                <ColorList colors={displayColors} disabled={true} size={38} />
+                <ColorList
+                    colors={displayColors}
+                    disabled={true}
+                    size={pegSize}
+                />
             </View>
 
             {/* Right: Clue badges or Active Indicator */}
